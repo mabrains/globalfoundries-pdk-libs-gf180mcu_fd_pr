@@ -121,8 +121,9 @@ if FEOL
     sb15a_l1.output("SB.15a", "SB.15a : Space from unsalicided Poly2 to unrelated Nplus/Pplus. : 0.18µm")
     sb15a_l1.forget
 
-    sb_15b_1 = poly2.interacting(nplus.or(pplus)).and(sab).edges.not(poly2.edges.and(sab)).separation(nplus.or(pplus).edges, 0.32.um, projection).polygons(0.001)
-    sb_15b_2 = poly2.interacting(nplus.or(pplus)).and(sab).separation(nplus.or(pplus), 0.32.um, projection).polygons(0.001)
+    sb_15b_3 = poly2.interacting(nplus + pplus).and(sab)
+    sb_15b_1 = sb_15b_3.edges.not(poly2.edges.and(sab)).separation(nplus.edges + pplus.edges, 0.32.um, projection).polygons(0.001)
+    sb_15b_2 = sb_15b_3.separation(nplus + pplus, 0.32.um, projection).polygons(0.001)
     # Rule SB.15b: Space from unsalicided Poly2 to unrelated Nplus/Pplus along Poly2 line. is 0.32µm
     logger.info("Executing rule SB.15b")
     sb15b_l1 = sb_15b_1.and(sb_15b_2).outside(otp_mk)
@@ -132,6 +133,8 @@ if FEOL
     sb_15b_1.forget
 
     sb_15b_2.forget
+
+    sb_15b_3.forget
 
     # Rule SB.16: SAB layer cannot exist on 3.3V and 5V/6V CMOS transistors' Poly and COMP area of the core circuit (Excluding the transistors used for ESD purpose). It can only exist on CMOS transistors marked by LVS_IO, OTP_MK, ESD_MK layers.
     logger.info("Executing rule SB.16")

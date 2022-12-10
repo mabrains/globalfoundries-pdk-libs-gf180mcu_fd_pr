@@ -85,7 +85,7 @@ if BEOL
 
     # Rule V1.4a: metal-2 overlap of via1.
     logger.info("Executing rule V1.4a")
-    v14a_l1 = metal2.enclosing(via1, 0.01.um, euclidian).polygons(0.001).or(via1.not_inside(metal2).not(metal2))
+    v14a_l1 = via1.enclosed(metal2, 0.01.um, euclidian).polygons(0.001).or(via1.not_inside(metal2).not(metal2))
     v14a_l1.output("V1.4a", "V1.4a : metal-2 overlap of via1.")
     v14a_l1.forget
     

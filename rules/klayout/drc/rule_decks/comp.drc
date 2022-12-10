@@ -63,16 +63,16 @@ if FEOL
 
     df_2a.forget
 
-    df_2b = comp.width(100.um + 1.dbu).polygons(0.001).not_inside(mos_cap_mk)
+    df_2b = comp.not_inside(mos_cap_mk).sized(-50.um).sized(50.um)
     # Rule DF.2b_3.3V: Max. COMP width for all cases except those used for capacitors, marked by ‘MOS_CAP_MK’ layer.
     logger.info("Executing rule DF.2b_3.3V")
-    df2b_l1 = comp.not_inside(mos_cap_mk).not_interacting(df_2b).not_interacting(v5_xtor).not_interacting(dualgate)
+    df2b_l1 = df_2b.not_interacting(v5_xtor).not_interacting(dualgate)
     df2b_l1.output("DF.2b_3.3V", "DF.2b_3.3V : Max. COMP width for all cases except those used for capacitors, marked by ‘MOS_CAP_MK’ layer.")
     df2b_l1.forget
 
     # Rule DF.2b_5V: Max. COMP width for all cases except those used for capacitors, marked by ‘MOS_CAP_MK’ layer.
     logger.info("Executing rule DF.2b_5V")
-    df2b_l1 = comp.not_inside(mos_cap_mk).not_interacting(df_2b).overlapping(dualgate)
+    df2b_l1 = df_2b.overlapping(dualgate)
     df2b_l1.output("DF.2b_5V", "DF.2b_5V : Max. COMP width for all cases except those used for capacitors, marked by ‘MOS_CAP_MK’ layer.")
     df2b_l1.forget
 
@@ -324,25 +324,33 @@ if FEOL
 
     comp_butt.forget
 
+    df12_l2 = comp.not_interacting(schottky_diode)
+    df12_l3 = comp.interacting(comp.not(nplus).not(pplus))
     # Rule DF.12_3.3V: COMP not covered by Nplus or Pplus is forbidden (except those COMP under marking).
     logger.info("Executing rule DF.12_3.3V")
-    df12_l1 = comp.not_interacting(schottky_diode).not_inside(nplus.or(pplus)).not_interacting(v5_xtor).not_interacting(dualgate)
+    df12_l1 = df12_l3.not_interacting(v5_xtor).not_interacting(dualgate)
     df12_l1.output("DF.12_3.3V", "DF.12_3.3V : COMP not covered by Nplus or Pplus is forbidden (except those COMP under marking).")
     df12_l1.forget
 
     # Rule DF.12_5V: COMP not covered by Nplus or Pplus is forbidden (except those COMP under marking).
     logger.info("Executing rule DF.12_5V")
-    df12_l1 = comp.not_interacting(schottky_diode).not_inside(nplus.or(pplus)).overlapping(dualgate)
+    df12_l1 = df12_l3.overlapping(dualgate)
     df12_l1.output("DF.12_5V", "DF.12_5V : COMP not covered by Nplus or Pplus is forbidden (except those COMP under marking).")
     df12_l1.forget
 
-    df13_ncomp = ncomp.inside(nwell.covering(ncomp).covering(pcomp))
-    df13_pcomp = pcomp.inside(nwell.covering(ncomp).covering(pcomp))
+    df12_l2.forget
+    df12_l3.forget
+
+    df13_l2 = nwell.covering(ncomp).covering(pcomp)
+    df13_ncomp = ncomp.inside(df13_l2)
+    df13_pcomp = pcomp.inside(df13_l2)
     # Rule DF.13_3.3V: Max distance of Nwell tap (NCOMP inside Nwell) from (PCOMP inside Nwell).
     logger.info("Executing rule DF.13_3.3V")
     df13_l1 = df13_ncomp.not_interacting(df13_pcomp.sized(20.um)).not_interacting(v5_xtor).not_interacting(dualgate)
     df13_l1.output("DF.13_3.3V", "DF.13_3.3V : Max distance of Nwell tap (NCOMP inside Nwell) from (PCOMP inside Nwell).")
     df13_l1.forget
+
+    df13_l2.forget
 
     # Rule DF.13_5V: Max distance of Nwell tap (NCOMP inside Nwell) from (PCOMP inside Nwell).
     logger.info("Executing rule DF.13_5V")

@@ -52,7 +52,7 @@ if BEOL
 
         # Rule V2.3b: metal2  overlap of via2.
         logger.info("Executing rule V2.3b")
-        v23b_l1 = metal2.enclosing(via2, 0.01.um, euclidian).polygons(0.001).or(via2.not_inside(metal2).not(metal2))
+        v23b_l1 = via2.enclosed(metal2, 0.01.um, euclidian).polygons(0.001).or(via2.not_inside(metal2).not(metal2))
         v23b_l1.output("V2.3b", "V2.3b : metal2  overlap of via2.")
         v23b_l1.forget
         
@@ -88,7 +88,7 @@ if BEOL
 
         # Rule V2.4a: metal3 overlap of via2.
         logger.info("Executing rule V2.4a")
-        v24a_l1 = metal3.enclosing(via2, 0.01.um, euclidian).polygons(0.001).or(via2.not_inside(metal3).not(metal3))
+        v24a_l1 = via2.enclosed(metal3, 0.01.um, euclidian).polygons(0.001).or(via2.not_inside(metal3).not(metal3))
         v24a_l1.output("V2.4a", "V2.4a : metal3 overlap of via2.")
         v24a_l1.forget
 
