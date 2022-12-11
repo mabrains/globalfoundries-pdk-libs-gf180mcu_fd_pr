@@ -54,34 +54,41 @@ if FEOL
 
     end #CONNECTIVITY_RULES
 
-    gate_mdn = poly2.and(comp).and(ldmos_xtor).and(dualgate)
+    poly_mdn = poly2.and(ncomp).inside(ldmos_xtor).inside(dualgate)
+    ldnmos = poly_mdn.not(mvsd)
+    ldnmos_edges = ldnmos.edges
+
     # Rule MDN.3a: Min transistor channel length. is 0.6µm
     logger.info("Executing rule MDN.3a")
-    mdn3a_l1 = gate_mdn.width(0.6.um, euclidian).polygons(0.001)
+    mdn3a_l1 = poly_mdn.enclosing(mvsd, 0.6.um, euclidian).polygons(0.001)
     mdn3a_l1.output("MDN.3a", "MDN.3a : Min transistor channel length. : 0.6µm")
     mdn3a_l1.forget
 
     # Rule MDN.3b: Max transistor channel length.
     logger.info("Executing rule MDN.3b")
-    good_mvsd = gate_mdn.width(20.001.um, euclidian).polygons(0.001)
-    mdn3b_l1 = gate_mdn.not(good_mvsd)
-    mdn3b_l1.output("MDN.3b", "MDN.3b : Max transistor channel length: 20 um")
+    mdn3b_l1 = ldnmos_edges.inside_part(ncomp).not(ldnmos.width(20.um + 1.dbu, projection).edges)
+    mdn3b_l1.output("MDN.3b", "MDN.3b : Max transistor channel length.")
     mdn3b_l1.forget
+
+    ldnmos_gateends = ldnmos_edges.outside_part(ncomp)
 
     # Rule MDN.4a: Min transistor channel width. is 4µm
     logger.info("Executing rule MDN.4a")
-    mdn4a_l1  = gate_mdn.width(4.um, euclidian).polygons(0.001)
-    mdn4a_l1.output("MDN.4a", "MDN.4a : Min transistor channel width. : 4 µm")
+    mdn4a_l1 = ldnmos_gateends.and(ldnmos.width(4.um, projection).edges).extended(0, 0, 0.001, 0.001)
+    mdn4a_l1.output("MDN.4a", "MDN.4a : Min transistor channel width. : 4µm")
     mdn4a_l1.forget
 
     # Rule MDN.4b: Max transistor channel width.
     logger.info("Executing rule MDN.4b")
-    good_gate = gate_mdn.width(50.001.um, euclidian).polygons(0.001)
-    mdn4b_l1 = gate_mdn.not(good_gate)
-    mdn4b_l1.output("MDN.4b", "MDN.4b : Max transistor channel width. : 50 um ")
+    mdn4b_l1 = ldnmos_gateends.not(ldnmos.width(50.um + 1.dbu, projection).edges).extended(0, 0, 0.001, 0.001)
+    mdn4b_l1.output("MDN.4b", "MDN.4b : Max transistor channel width.")
     mdn4b_l1.forget
 
-    gate_mdn.forget
+    ldnmos_gateends.forget
+
+    ldnmos_edges.forget
+    ldnmos.forget
+    poly_mdn.forget
 
     pcomp_mdn5a = pcomp.not_interacting(ncomp).inside(ldmos_xtor).inside(dualgate)
     # Rule MDN.5ai: Min PCOMP (Pplus AND COMP) space to LDNMOS Drain MVSD (source and body tap non-butted). PCOMP (Pplus AND COMP) intercept with LDNMOS Drain MVSD is not allowed.
