@@ -39,6 +39,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 DEFAULT_TEMP = 25.0
 PASS_THRESH = 2.0
+MAX_VOLTAGE = 3.3
 
 def find_diode(filepath):
     """
@@ -86,7 +87,7 @@ def ext_cv_measured(dev_data_path, device, corners,dev_path):
             else:
                 temp = 175
             
-            len = []
+            leng = []
             wid = []
             tempr = []
             cor = []
@@ -101,7 +102,8 @@ def ext_cv_measured(dev_data_path, device, corners,dev_path):
                     },
                     inplace=True,
                 )
-            
+                
+        
             else :
 
                 idf = df[["Vj", f"diode_{corner}.{i}"]].copy()
@@ -113,17 +115,27 @@ def ext_cv_measured(dev_data_path, device, corners,dev_path):
                     inplace=True,
                 ) 
 
+            meas_volt = []
+            meas_diode = []
+            for j in range(idf["measured_volt"].count()) : 
+                if abs(idf["measured_volt"][j]) < MAX_VOLTAGE :
+                    meas_volt.append(idf["measured_volt"][j])
+                    meas_diode.append(idf["diode_measured"][j])
+                else :
+                    break  
+            meas_data = pd.DataFrame({"measured_volt":meas_volt,"diode_measured":meas_diode})
+
             os.makedirs(f"{dev_path}/measured_cv", exist_ok=True)
-            idf.to_csv(f"{dev_path}/measured_cv/measured_A{width}_P{length}_t{temp}_{corner}.csv")
+            meas_data.to_csv(f"{dev_path}/measured_cv/measured_A{width}_P{length}_t{temp}_{corner}.csv")
             
-            len.append(length)
+            leng.append(length)
             wid.append(width)
             tempr.append(temp)
             cor.append(corner)
             meas.append(f"{dev_path}/measured_cv/measured_A{width}_P{length}_t{temp}_{corner}.csv")
 
         
-            sdf = {"length":len,"width":wid,"temp":tempr,"corner":cor,"diode_measured":meas}
+            sdf = {"length":leng,"width":wid,"temp":tempr,"corner":cor,"diode_measured":meas}
             sdf = pd.DataFrame(sdf)
             all_dfs.append(sdf)
 
@@ -294,59 +306,63 @@ def main():
             meas_cv_df = ext_cv_measured(diode_cv_file, dev, corners,dev_path)
         else:
             meas_cv_df = []
+        
+        meas_len = len(pd.read_csv(glob.glob(f"{dev_path}/measured_cv/*.csv")[1]))
 
-        print("# Device {} number of measured_datapoints : ".format(dev), len(meas_cv_df))
+
+        print("# Device {} number of measured_datapoints : ".format(dev), len(meas_cv_df)*meas_len)
         
 
-        sim_df = run_sims(meas_cv_df, dev_path, 3)
-        print("# Device {} number of simulated datapoints : ".format(dev), len(sim_df))
+        sim_cv_df = run_sims(meas_cv_df, dev_path, 3)
+        sim_len = len(pd.read_csv(glob.glob(f"{dev_path}/simulated_cv/*.csv")[1]))
+        print("# Device {} number of simulated datapoints : ".format(dev), len(sim_cv_df)*sim_len)
 
 
-        merged_df = meas_cv_df.merge(
-            sim_df, on=["device", "corner", "length", "width", "temp"], how="left"
+        merged_cv_df = meas_cv_df.merge(
+            sim_cv_df, on=["device", "corner", "length", "width", "temp"], how="left"
         )
         
-        merged_dfs = []
-        for i in range(len(merged_df)):
-            measured_data = pd.read_csv(merged_df["diode_measured"][i])
-            simulated_data = pd.read_csv(merged_df["diode_sim"][i])
-            result_data = simulated_data.merge(
-            measured_data, how="left"
+        merged_cv_dfs = []
+        for i in range(len(merged_cv_df)):
+            measured_cv_data = pd.read_csv(merged_cv_df["diode_measured"][i])
+            simulated_cv_data = pd.read_csv(merged_cv_df["diode_sim"][i])
+            result_cv_data = simulated_cv_data.merge(
+            measured_cv_data, how="left"
             )
-            result_data["corner"] = merged_df["diode_measured"][i].split("/")[-1].split("_")[-1].split(".")[0]
-            result_data["device"] = merged_df["diode_measured"][i].split("/")[1]
-            result_data["length"] = merged_df["diode_measured"][i].split("/")[-1].split("_")[1].split("A")[1]
-            result_data["width"] = merged_df["diode_measured"][i].split("/")[-1].split("_")[2].split("P")[1]
-            result_data["temp"] = merged_df["diode_measured"][i].split("/")[-1].split("_")[3].split("t")[1]
+            result_cv_data["corner"] = merged_cv_df["diode_measured"][i].split("/")[-1].split("_")[-1].split(".")[0]
+            result_cv_data["device"] = merged_cv_df["diode_measured"][i].split("/")[1]
+            result_cv_data["length"] = merged_cv_df["diode_measured"][i].split("/")[-1].split("_")[1].split("A")[1]
+            result_cv_data["width"] = merged_cv_df["diode_measured"][i].split("/")[-1].split("_")[2].split("P")[1]
+            result_cv_data["temp"] = merged_cv_df["diode_measured"][i].split("/")[-1].split("_")[3].split("t")[1]
             
             
-            result_data["error"] = (
-                np.abs(result_data["diode_simulated"] - result_data["diode_measured"])
+            result_cv_data["error"] = (
+                np.abs(result_cv_data["diode_simulated"] - result_cv_data["diode_measured"])
                  * 100.0
-                / result_data["diode_measured"]
+                / result_cv_data["diode_measured"]
             )
 
-            result_data = result_data [
+            result_cv_data = result_cv_data [
                 ["device","length","width","temp","corner","measured_volt","diode_measured","diode_simulated","error"]
             ]
 
-            merged_dfs.append(result_data)
+            merged_cv_dfs.append(result_cv_data)
         
-        merged_out = pd.concat(merged_dfs)
+        merged_cv_out = pd.concat(merged_cv_dfs)
 
 
-        merged_out.to_csv(f"{dev_path}/error_analysis.csv", index=False)
+        merged_cv_out.to_csv(f"{dev_path}/error_analysis_cv.csv", index=False)
 
         print(
             "# Device {} min error: {:.2f} , max error: {:.2f}, mean error {:.2f}".format(
                 dev,
-                merged_out["error"].min(),
-                merged_out["error"].max(),
-                merged_out["error"].mean(),
+                merged_cv_out["error"].min(),
+                merged_cv_out["error"].max(),
+                merged_cv_out["error"].mean(),
             )
         )
 
-        if result_data["error"].max() < PASS_THRESH:
+        if result_cv_data["error"].max() < PASS_THRESH:
             print("# Device {} has passed regression.".format(dev))
         else:
             print("# Device {} has failed regression. Needs more analysis.".format(dev))
