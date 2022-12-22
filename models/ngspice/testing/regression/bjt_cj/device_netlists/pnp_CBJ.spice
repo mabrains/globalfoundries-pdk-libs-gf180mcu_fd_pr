@@ -31,7 +31,7 @@ save all @q.xq1.q0[cmu]
 run 
 print  @q.xq1.q0[cmu]
 
-wrdata {{device}}_{{cv_sim}}_{{corner}}_T{{temp}}/simulated_{{cv_sim}}/1_simulated_{{device}}.csv @q.xq1.q0[cmu]*1.0e15
+wrdata bjt_cj_regr/pnp/cj_simulated/simulated_{{device}}_t{{temp}}_c{{corner}}.csv @q.xq1.q0[cmu]*1.0e15
 
 .endc
 
