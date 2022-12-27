@@ -46,9 +46,7 @@ def call_simulator(file_name):
     Args:
         file_name(str): Netlist file name.
     """
-    return os.system(
-        f"ngspice -b -a {file_name} -o {file_name}.log > {file_name}.log"
-    )
+    return os.system(f"ngspice -b -a {file_name} -o {file_name}.log > {file_name}.log")
 
 
 def ext_measured(
@@ -78,8 +76,6 @@ def ext_measured(
 
     # Extracting measured values for each Device
     for i in range(no_rows):
-        
- 
 
         # building up temperature
         if i in range(0, temp_range):
@@ -98,8 +94,8 @@ def ext_measured(
         # reading third column for getting device name, cap_name
         data = df["Unnamed: 2"][i]  # data is a string now
         cap_name = data[4:7]
-        # as CSJ make NAN 
-        if cap_name == "CSJ" :
+        # as CSJ make NAN
+        if cap_name == "CSJ":
             continue
         end_location = data.find("(")
         read_dev_name = data[8:end_location]
@@ -136,33 +132,21 @@ def ext_measured(
         # extracting C-V measured data
         # Special case for 1st measured values
         if i == 0:
-            cj_values = df[
-                [
-                    "Vj",
-                    "bjt_typical",
-                    "bjt_ff",
-                    "bjt_ss"
-                ]
-            ].copy()
+            cj_values = df[["Vj", "bjt_typical", "bjt_ff", "bjt_ss"]].copy()
 
             cj_values.rename(
                 columns={
                     "Vj": "volt",
                     "bjt_typical": "measured_bjt_typical",
                     "bjt_ff": "measured_bjt_ff",
-                    "bjt_ss": "measured_bjt_ss"
+                    "bjt_ss": "measured_bjt_ss",
                 },
-                inplace=True
+                inplace=True,
             )
 
         else:
             cj_values = df[
-                [
-                    "Vj",
-                    f"bjt_typical.{i}",
-                    f"bjt_ff.{i}",
-                    f"bjt_ss.{i}"
-                ]
+                ["Vj", f"bjt_typical.{i}", f"bjt_ff.{i}", f"bjt_ss.{i}"]
             ].copy()
 
             cj_values.rename(
@@ -170,16 +154,16 @@ def ext_measured(
                     "Vj": "volt",
                     f"bjt_typical.{i}": "measured_bjt_typical",
                     f"bjt_ff.{i}": "measured_bjt_ff",
-                    f"bjt_ss.{i}": "measured_bjt_ss"
+                    f"bjt_ss.{i}": "measured_bjt_ss",
                 },
-                inplace=True
+                inplace=True,
             )
 
         os.makedirs(f"{dev_path}/cj_measured", exist_ok=True)
         cj_values.dropna(axis=0, inplace=True)
         cj_values.to_csv(
             f"{dev_path}/cj_measured/measured_{dev_name}_t{temp}_{cap_name}.csv",
-            index=False
+            index=False,
         )
 
         dev_names.append(dev_name)
@@ -193,7 +177,7 @@ def ext_measured(
             "device": dev_names,
             "temp": temp_value,
             "cap": cap_names,
-            "cj_measured": cj_measured
+            "cj_measured": cj_measured,
         }
         sdf = pd.DataFrame(sdf)
         all_dfs.append(sdf)
@@ -227,17 +211,14 @@ def run_sim(dirpath: str, cap: str, device: str, temp: float) -> dict:
 
         netlist_tmp = f"device_netlists/{dev}_{cap}.spice"
         temp_str = "{:.1f}".format(temp)
-        netlist_path =f"{dirpath}/{dev}_netlists/netlist_{device}_t{temp_str}_{cap}_{corner}.spice"
+        netlist_path = f"{dirpath}/{dev}_netlists/netlist_{device}_t{temp_str}_{cap}_{corner}.spice"
 
-        result_path = (
-            f"{dirpath}/cj_simulated/simulated_{device}_t{temp_str}_{cap}.csv"
-        )
+        result_path = f"{dirpath}/cj_simulated/simulated_{device}_t{temp_str}_{cap}.csv"
         result_path_corner = (
             f"{dirpath}/cj_simulated/simulated_{device}_t{temp_str}_{cap}_{corner}.csv"
         )
         # initiating the directory in which results will be stored
         os.makedirs(f"{dirpath}/cj_simulated", exist_ok=True)
-
 
         with open(netlist_tmp) as f:
             tmpl = Template(f.read())
@@ -250,7 +231,7 @@ def run_sim(dirpath: str, cap: str, device: str, temp: float) -> dict:
                         device=device,
                         temp=temp_str,
                         cap=cap,
-                        corner=corner
+                        corner=corner,
                     )
                 )
             with open(netlist_path, "r") as netlist:
@@ -259,7 +240,7 @@ def run_sim(dirpath: str, cap: str, device: str, temp: float) -> dict:
             # print(netlist_str)
             # exit()
             with open(netlist_path, "w") as netlist:
-                    netlist.write(netlist_str)
+                netlist.write(netlist_str)
 
         # Running ngspice for each netlist
         try:
@@ -274,14 +255,12 @@ def run_sim(dirpath: str, cap: str, device: str, temp: float) -> dict:
         except Exception:
             bjt_simu_cj = "None"
 
-    info["cj_simulated"]= bjt_simu_cj
-    
+    info["cj_simulated"] = bjt_simu_cj
+
     return info
 
 
-def run_sims(
-    df: pd.DataFrame, dirpath: str, num_workers=mp.cpu_count()
-) :
+def run_sims(df: pd.DataFrame, dirpath: str, num_workers=mp.cpu_count()):
     """passing netlists to run_sim function
         and storing the results csv files into dataframes
 
@@ -296,9 +275,7 @@ def run_sims(
 
     results = list()
 
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=num_workers
-    ) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures_list = list()
         for j, row in df.iterrows():
             futures_list.append(
@@ -317,58 +294,37 @@ def run_sims(
     sf.sort()
 
     # sweeping on all generated cvs files
-    for i in range(0,len(sf),3):
-        sdf = pd.read_csv(
-            sf[i],
-            header=None,
-            delimiter=r"\s+"
-        )
+    for i in range(0, len(sf), 3):
+        sdf = pd.read_csv(sf[i], header=None, delimiter=r"\s+")
         sweep = len(pd.read_csv(glob.glob(f"{dirpath}/cj_measured/*.csv")[1]))
         new_array = np.empty((sweep, 4))
         new_array[:, 0] = sdf.iloc[:sweep, 0]
         new_array[:, 1] = sdf.iloc[:sweep, 1]
 
-        sdf = pd.read_csv(
-            sf[i+1],
-            header=None,
-            delimiter=r"\s+"
-        )
+        sdf = pd.read_csv(sf[i + 1], header=None, delimiter=r"\s+")
         new_array[:, 2] = sdf.iloc[:sweep, 1]
 
-        sdf = pd.read_csv(
-            sf[i+2],
-            header=None,
-            delimiter=r"\s+"
-        )
+        sdf = pd.read_csv(sf[i + 2], header=None, delimiter=r"\s+")
         new_array[:, 3] = sdf.iloc[:sweep, 1]
-
 
         # Writing final simulated data 1
         final_sim_res = sf[i].replace("_ff", "")
-        
+
         sdf = pd.DataFrame(new_array)
-        sdf.to_csv(
-            final_sim_res,
-            index=False
-        )
+        sdf.to_csv(final_sim_res, index=False)
         sdf.rename(
             columns={
                 0: "volt",
                 1: "simulated_bjt_ff",
                 2: "simulated_bjt_ss",
-                3: "simulated_bjt_typical"
-
+                3: "simulated_bjt_typical",
             },
-            inplace=True
+            inplace=True,
         )
-        sdf.iloc[: , 0:].to_csv(
-            final_sim_res,
-            index=False
-        )
+        sdf.iloc[:, 0:].to_csv(final_sim_res, index=False)
     df = pd.DataFrame(results)
 
     return df
-
 
 
 def error_cal(merged_df: pd.DataFrame, dev_path: str) -> None:
@@ -385,18 +341,17 @@ def error_cal(merged_df: pd.DataFrame, dev_path: str) -> None:
 
     merged_df.drop_duplicates()
     for i in range(len(merged_df)):
-        
-        measured_data = pd.read_csv(merged_df["cj_measured"][i])
-        simulated_data = pd.read_csv(merged_df["cj_measured"][i].replace("measured", "simulated"))        
 
-        result_data = pd.merge( measured_data,simulated_data, on ='volt', how ="left")
-  
+        measured_data = pd.read_csv(merged_df["cj_measured"][i])
+        simulated_data = pd.read_csv(
+            merged_df["cj_measured"][i].replace("measured", "simulated")
+        )
+
+        result_data = pd.merge(measured_data, simulated_data, on="volt", how="left")
+
         result_data["cap"] = merged_df["cap"][i]
         result_data["device"] = (
-            merged_df["cj_measured"][i]
-            .split("/")[-1]
-            .split("d_")[1]
-            .split("_t")[0]
+            merged_df["cj_measured"][i].split("/")[-1].split("d_")[1].split("_t")[0]
         )
         result_data["temp"] = (
             merged_df["cj_measured"][i]
@@ -415,19 +370,13 @@ def error_cal(merged_df: pd.DataFrame, dev_path: str) -> None:
         )
 
         result_data["error_bjt_ff"] = (
-            np.abs(
-                result_data["simulated_bjt_ff"]
-                - result_data["measured_bjt_ff"]
-            )
+            np.abs(result_data["simulated_bjt_ff"] - result_data["measured_bjt_ff"])
             * 100.0
             / result_data["measured_bjt_ff"]
         )
 
         result_data["error_bjt_ss"] = (
-            np.abs(
-                result_data["simulated_bjt_ss"]
-                - result_data["measured_bjt_ss"]
-            )
+            np.abs(result_data["simulated_bjt_ss"] - result_data["measured_bjt_ss"])
             * 100.0
             / result_data["measured_bjt_ss"]
         )
@@ -437,7 +386,6 @@ def error_cal(merged_df: pd.DataFrame, dev_path: str) -> None:
                 result_data["error_bjt_ss"]
                 + result_data["error_bjt_ff"]
                 + result_data["error_bjt_typical"]
-
             )
             / 3
         )
@@ -458,27 +406,27 @@ def main():
     pd.set_option("display.width", 1000)
 
     main_regr_dir = "bjt_cj_regr"
-    devices = ["npn","pnp"]
+    devices = ["npn", "pnp"]
     npn_devices = [
         "npn_10p00x10p00",
         "npn_05p00x05p00",
         "npn_00p54x16p00",
         "npn_00p54x08p00",
         "npn_00p54x04p00",
-        "npn_00p54x02p00"
+        "npn_00p54x02p00",
     ]
 
     pnp_devices = [
         "pnp_10p00x00p42",
         "pnp_05p00x00p42",
         "pnp_10p00x10p00",
-        "pnp_05p00x05p00"
+        "pnp_05p00x05p00",
     ]
 
     for i, dev in enumerate(devices):
         dev_path = f"{main_regr_dir}/{dev}"
 
-        if os.path.exists(dev_path)  and os.path.isdir(dev_path) :
+        if os.path.exists(dev_path) and os.path.isdir(dev_path):
             shutil.rmtree(dev_path)
 
         os.makedirs(f"{dev_path}", exist_ok=False)
@@ -513,22 +461,27 @@ def main():
             meas_df = list()
 
         meas_len = len(
-            pd.read_csv(glob.glob(f"{dev_path}/cj_measured/*.csv")[0])
+            pd.read_csv(glob.glob(f"{dev_path}/cj_measured/*.csv")[1])
         )
+        print(
+            f"# Device {dev} number of measured_datapoints : ",
+            len(meas_df) * meas_len,
+        )
+
+        # assuming number of used cores is 3
+        # calling run_sims function for simulating devices
         sim_df = run_sims(meas_df, dev_path, workers_count)
-       
+
         # Merging measured dataframe with the simulated one
-        merged_df = meas_df.merge(sim_df, on=["device", "temp","cap"], how="left")
-  
-            
+        merged_df = meas_df.merge(sim_df, on=["device", "temp", "cap"], how="left")
+
         # passing dataframe to the error_calculation function
         # calling error function for creating statistical csv file
         error_cal(merged_df, dev_path)
 
         merged_all = pd.read_csv(f"{dev_path}/error_analysis.csv")
         # number of rows in the final excel sheet
-        num_rows = merged_all["device"].count()   
-
+        num_rows = merged_all["device"].count()
 
         # calculating the error of each device and reporting it
         for i in range(NO_ROWS_NPN_W):
@@ -540,7 +493,7 @@ def main():
             # number of rows in the final excel sheet
             num_rows = merged_all["device"].count()
 
-# calculating the error of each device and reporting it
+        # calculating the error of each device and reporting it
         for dev in list_dev:
             min_error_total = float()
             max_error_total = float()
@@ -590,7 +543,6 @@ def main():
             print("\n\n")
 
         print("\n\n")
-
 
 
 # # ================================================================
