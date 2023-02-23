@@ -15,33 +15,31 @@
 ################################################################################################
 
 if FEOL
-    #================================================
-    #---------------------MCELL----------------------
-    #================================================
+  #================================================
+  #---------------------MCELL----------------------
+  #================================================
 
-    # Rule MC.1: min. mcell width is 0.4µm
-    logger.info("Executing rule MC.1")
-    mc1_l1  = mcell_feol_mk.width(0.4.um, euclidian).polygons(0.001)
-    mc1_l1.output("MC.1", "MC.1 : min. mcell width : 0.4µm")
-    mc1_l1.forget
+  # Rule MC.1: min. mcell width is 0.4µm
+  logger.info('Executing rule MC.1')
+  mc1_l1 = mcell_feol_mk.width(0.4.um, euclidian)
+  mc1_l1.output('MC.1', 'MC.1 : min. mcell width : 0.4µm')
+  mc1_l1.forget
 
-    # Rule MC.2: min. mcell spacing is 0.4µm
-    logger.info("Executing rule MC.2")
-    mc2_l1  = mcell_feol_mk.space(0.4.um, euclidian).polygons(0.001)
-    mc2_l1.output("MC.2", "MC.2 : min. mcell spacing : 0.4µm")
-    mc2_l1.forget
+  # Rule MC.2: min. mcell spacing is 0.4µm
+  logger.info('Executing rule MC.2')
+  mc2_l1 = mcell_feol_mk.space(0.4.um, euclidian)
+  mc2_l1.output('MC.2', 'MC.2 : min. mcell spacing : 0.4µm')
+  mc2_l1.forget
 
-    # Rule MC.3: Minimum Mcell area is 0.35µm²
-    logger.info("Executing rule MC.3")
-    mc3_l1  = mcell_feol_mk.with_area(nil, 0.35.um)
-    mc3_l1.output("MC.3", "MC.3 : Minimum Mcell area : 0.35µm²")
-    mc3_l1.forget
+  # Rule MC.3: Minimum Mcell area is 0.35µm²
+  logger.info('Executing rule MC.3')
+  mc3_l1 = mcell_feol_mk.with_area(nil, 0.35.um)
+  mc3_l1.output('MC.3', 'MC.3 : Minimum Mcell area : 0.35µm²')
+  mc3_l1.forget
 
-    # Rule MC.4: Minimum area enclosed by Mcell is 0.35µm²
-    logger.info("Executing rule MC.4")
-    mc4_l1  = mcell_feol_mk.holes.with_area(nil, 0.35.um)
-    mc4_l1.output("MC.4", "MC.4 : Minimum area enclosed by Mcell : 0.35µm²")
-    mc4_l1.forget
-end #FEOL
-
-
+  # Rule MC.4: Minimum area enclosed by Mcell is 0.35µm²
+  logger.info('Executing rule MC.4')
+  mc4_l1 = mcell_feol_mk.holes.with_area(nil, 0.35.um)
+  mc4_l1.output('MC.4', 'MC.4 : Minimum area enclosed by Mcell : 0.35µm²')
+  mc4_l1.forget
+end

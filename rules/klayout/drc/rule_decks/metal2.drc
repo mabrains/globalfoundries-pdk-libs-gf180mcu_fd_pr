@@ -15,31 +15,33 @@
 ################################################################################################
 
 if BEOL
-    #================================================
-    #---------------------METAL2---------------------
-    #================================================
+  #================================================
+  #---------------------METAL2---------------------
+  #================================================
 
-    # Rule M2.1: min. metal2 width is 0.28µm
-    logger.info("Executing rule M2.1")
-    m21_l1  = metal2.width(0.28.um, euclidian).polygons(0.001)
-    m21_l1.output("M2.1", "M2.1 : min. metal2 width : 0.28µm")
-    m21_l1.forget
+  # Rule M2.1: min. metal2 width is 0.28µm
+  logger.info('Executing rule M2.1')
+  m21_l1 = metal2.width(0.28.um, euclidian)
+  m21_l1.output('M2.1', 'M2.1 : min. metal2 width : 0.28µm')
+  m21_l1.forget
 
-    # Rule M2.2a: min. metal2 spacing is 0.28µm
-    logger.info("Executing rule M2.2a")
-    m22a_l1  = metal2.space(0.28.um, euclidian).polygons(0.001)
-    m22a_l1.output("M2.2a", "M2.2a : min. metal2 spacing : 0.28µm")
-    m22a_l1.forget
+  # Rule M2.2a: min. metal2 spacing is 0.28µm
+  logger.info('Executing rule M2.2a')
+  m22a_l1 = metal2.space(0.28.um, euclidian)
+  m22a_l1.output('M2.2a', 'M2.2a : min. metal2 spacing : 0.28µm')
+  m22a_l1.forget
 
-    # Rule M2.2b: Space to wide Metal2 (length & width > 10um) is 0.3µm
-    logger.info("Executing rule M2.2b")
-    m22b_l1  = metal2.separation(metal2.not_interacting(metal2.edges.with_length(nil, 10.um)), 0.3.um, euclidian).polygons(0.001)
-    m22b_l1.output("M2.2b", "M2.2b : Space to wide Metal2 (length & width > 10um) : 0.3µm")
-    m22b_l1.forget
+  # Rule M2.2b: Space to wide Metal2 (length & width > 10um) is 0.3µm
+  logger.info('Executing rule M2.2b')
+  wide_m2 = metal2.not_interacting(metal2.edges.with_length(nil, 10.um))
+  m22b_l1 = metal2.separation(wide_m2, 0.3.um, euclidian)
+  m22b_l1.output('M2.2b', 'M2.2b : Space to wide Metal2 (length & width > 10um) : 0.3µm')
+  m22b_l1.forget
+  wide_m2.forget
 
-    # Rule M2.3: Minimum metal2 area is 0.1444µm²
-    logger.info("Executing rule M2.3")
-    m23_l1  = metal2.with_area(nil, 0.1444.um)
-    m23_l1.output("M2.3", "M2.3 : Minimum metal2 area : 0.1444µm²")
-    m23_l1.forget
-end # BEOL
+  # Rule M2.3: Minimum metal2 area is 0.1444µm²
+  logger.info('Executing rule M2.3')
+  m23_l1 = metal2.with_area(nil, 0.1444.um)
+  m23_l1.output('M2.3', 'M2.3 : Minimum metal2 area : 0.1444µm²')
+  m23_l1.forget
+end
