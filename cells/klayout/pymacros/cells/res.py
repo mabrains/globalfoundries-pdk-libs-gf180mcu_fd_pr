@@ -18,15 +18,7 @@
 
 import pya
 import os
-from .draw_res import (
-    draw_metal_res,
-    draw_nplus_res,
-    draw_pplus_res,
-    draw_npolyf_res,
-    draw_ppolyf_res,
-    draw_ppolyf_u_high_Rs_res,
-    draw_well_res,
-)
+from .draw_res import *
 
 rm1_l = 0.23
 rm1_w = 0.23
@@ -58,8 +50,8 @@ pplus_u_w = 0.42
 nwell_l = 0.42
 nwell_w = 0.42
 
-pwell_l = 2.0
-pwell_w = 2.0
+pwell_l = 0.42
+pwell_w = 0.42
 
 npolyf_s_l = 0.42
 npolyf_s_w = 0.42
@@ -97,10 +89,8 @@ class metal_resistor(pya.PCellDeclarationHelper):
         self.Type_handle.add_choice("tm11k", "tm11k")
         self.Type_handle.add_choice("tm30k", "tm30k")
 
-        self.param("l_res", self.TypeDouble, "Width", default=rm1_l, unit="um")
-        self.param("w_res", self.TypeDouble, "Length", default=rm1_w, unit="um")
-        self.param("l_res", self.TypeDouble, "Width", default=rm1_l, unit="um")
-        self.param("w_res", self.TypeDouble, "Length", default=rm1_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=rm1_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=rm1_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -112,70 +102,45 @@ class metal_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return (
-            "metal_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
-        )
-        return (
-            "metal_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
-        )
+        return "metal_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
         if (self.res_type) == "rm1":
-            if (self.l_res) < rm1_l:
-                self.l_res = rm1_l
-            if (self.w_res) < rm1_w:
-                self.w_res = rm1_w
-            if (self.l_res) < rm1_l:
-                self.l_res = rm1_l
-            if (self.w_res) < rm1_w:
-                self.w_res = rm1_w
+            if (self.l) < rm1_l:
+                self.l = rm1_l
+            if (self.w) < rm1_w:
+                self.w = rm1_w
 
         if (self.res_type) == "rm2" or (self.res_type) == "rm3":
-            if (self.l_res) < rm2_3_l:
-                self.l_res = rm2_3_l
-            if (self.w_res) < rm2_3_w:
-                self.w_res = rm2_3_w
+            if (self.l) < rm2_3_l:
+                self.l = rm2_3_l
+            if (self.w) < rm2_3_w:
+                self.w = rm2_3_w
 
         if (self.res_type) == "tm6k":
-            if (self.l_res) < tm6k_l:
-                self.l_res = tm6k_l
-            if (self.w_res) < tm6k_w:
-                self.w_res = tm6k_w
+            if (self.l) < tm6k_l:
+                self.l = tm6k_l
+            if (self.w) < tm6k_w:
+                self.w = tm6k_w
 
         if (self.res_type) == "tm9k" or (self.res_type) == "tm11k":
-            if (self.l_res) < tm9_11k_l:
-                self.l_res = tm9_11k_l
-            if (self.w_res) < tm9_11k_w:
-                self.w_res = tm9_11k_w
+            if (self.l) < tm9_11k_l:
+                self.l = tm9_11k_l
+            if (self.w) < tm9_11k_w:
+                self.w = tm9_11k_w
 
         if (self.res_type) == "tm30k":
-            if (self.l_res) < tm30k_l:
-                self.l_res = tm30k_l
-            if (self.w_res) < tm30k_w:
-                self.w_res = tm30k_w
+            if (self.l) < tm30k_l:
+                self.l = tm30k_l
+            if (self.w) < tm30k_w:
+                self.w = tm30k_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -186,7 +151,7 @@ class metal_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -218,15 +183,7 @@ class metal_resistor(pya.PCellDeclarationHelper):
                 or ((self.res_type) == "tm30k")
             ):
                 raise TypeError(f"Current stack ({option}) doesn't allow this option")
-        np_instance = draw_metal_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type=self.res_type,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-        )
+        np_instance = draw_metal_res(self.layout, self.l, self.w, self.res_type)
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
@@ -253,8 +210,8 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=nplus_s_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=nplus_s_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=nplus_s_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=nplus_s_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -267,34 +224,22 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
         )
         self.param("sub", self.TypeBoolean, "Substrate terminal", default=1)
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "nplus_s_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "nplus_s_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < nplus_s_l:
-            self.l_res = nplus_s_l
-        if (self.w_res) < nplus_s_w:
-            self.w_res = nplus_s_w
+        if (self.l) < nplus_s_l:
+            self.l = nplus_s_l
+        if (self.w) < nplus_s_w:
+            self.w = nplus_s_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -305,7 +250,7 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -314,18 +259,8 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_nplus_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="nplus_s",
-            sub=self.sub,
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_nplus_s_res(
+            self.layout, self.l, self.w, self.sub, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -353,8 +288,8 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=pplus_s_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=pplus_s_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=pplus_s_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=pplus_s_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -366,34 +301,22 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "pplus_s_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "pplus_s_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < pplus_s_l:
-            self.l_res = pplus_s_l
-        if (self.w_res) < pplus_s_w:
-            self.w_res = pplus_s_w
+        if (self.l) < pplus_s_l:
+            self.l = pplus_s_l
+        if (self.w) < pplus_s_w:
+            self.w = pplus_s_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -404,7 +327,7 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -413,17 +336,8 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_pplus_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="pplus_s",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_pplus_s_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -451,8 +365,8 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=nplus_u_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=nplus_u_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=nplus_u_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=nplus_u_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -465,34 +379,22 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
         )
         self.param("sub", self.TypeBoolean, "Substrate terminal", default=1)
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "nplus_u_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "nplus_u_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < nplus_u_l:
-            self.l_res = nplus_u_l
-        if (self.w_res) < nplus_u_w:
-            self.w_res = nplus_u_w
+        if (self.l) < nplus_u_l:
+            self.l = nplus_u_l
+        if (self.w) < nplus_u_w:
+            self.w = nplus_u_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -503,7 +405,7 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -512,18 +414,8 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_nplus_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="nplus_u",
-            sub=self.sub,
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_nplus_u_res(
+            self.layout, self.l, self.w, self.sub, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -551,8 +443,8 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=pplus_u_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=pplus_u_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=pplus_u_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=pplus_u_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -564,34 +456,22 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "pplus_u_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "pplus_u_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < pplus_u_l:
-            self.l_res = pplus_u_l
-        if (self.w_res) < pplus_u_w:
-            self.w_res = pplus_u_w
+        if (self.l) < pplus_u_l:
+            self.l = pplus_u_l
+        if (self.w) < pplus_u_w:
+            self.w = pplus_u_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -602,7 +482,7 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -611,17 +491,8 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_pplus_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="pplus_u",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_pplus_u_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -647,8 +518,8 @@ class nwell_resistor(pya.PCellDeclarationHelper):
         super(nwell_resistor, self).__init__()
 
         # ===================== PARAMETERS DECLARATIONS =====================
-        self.param("w_res", self.TypeDouble, "Width", default=nwell_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=nwell_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=nwell_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=nwell_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -660,34 +531,20 @@ class nwell_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return (
-            "nwell_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
-        )
+        return "nwell_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < nwell_l:
-            self.l_res = nwell_l
-        if (self.w_res) < nwell_w:
-            self.w_res = nwell_w
+        if (self.l) < nwell_l:
+            self.l = nwell_l
+        if (self.w) < nwell_w:
+            self.w = nwell_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -698,7 +555,7 @@ class nwell_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -707,17 +564,7 @@ class nwell_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_well_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="nwell",
-            pcmpgr=0,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
-        )
+        np_instance = draw_nwell_res(self.layout, self.l, self.w)
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
@@ -743,8 +590,8 @@ class pwell_resistor(pya.PCellDeclarationHelper):
 
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=pwell_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=pwell_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=pwell_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=pwell_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -756,34 +603,20 @@ class pwell_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
-        return (
-            "pwell_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
-        )
+        return "pwell_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < pwell_l:
-            self.l_res = pwell_l
-        if (self.w_res) < pwell_w:
-            self.w_res = pwell_w
+        if (self.l) < pwell_l:
+            self.l = pwell_l
+        if (self.w) < pwell_w:
+            self.w = pwell_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -794,7 +627,7 @@ class pwell_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -803,17 +636,7 @@ class pwell_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_well_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="pwell",
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
-        )
+        np_instance = draw_pwell_res(self.layout, self.l, self.w, self.pcmpgr)
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
@@ -840,8 +663,8 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=npolyf_s_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=npolyf_s_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=npolyf_s_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=npolyf_s_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -853,34 +676,22 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "npolyf_s_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "npolyf_s_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < npolyf_s_l:
-            self.l_res = npolyf_s_l
-        if (self.w_res) < npolyf_s_w:
-            self.w_res = npolyf_s_w
+        if (self.l) < npolyf_s_l:
+            self.l = npolyf_s_l
+        if (self.w) < npolyf_s_w:
+            self.w = npolyf_s_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -891,7 +702,7 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -900,17 +711,8 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_npolyf_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="npolyf_s",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_npolyf_s_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -938,8 +740,8 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=ppolyf_s_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=ppolyf_s_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=ppolyf_s_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=ppolyf_s_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -951,34 +753,22 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "ppolyf_s_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "ppolyf_s_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < ppolyf_s_l:
-            self.l_res = ppolyf_s_l
-        if (self.w_res) < ppolyf_s_w:
-            self.w_res = ppolyf_s_w
+        if (self.l) < ppolyf_s_l:
+            self.l = ppolyf_s_l
+        if (self.w) < ppolyf_s_w:
+            self.w = ppolyf_s_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -989,7 +779,7 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -998,17 +788,8 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_ppolyf_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="ppolyf_s",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_ppolyf_s_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -1036,8 +817,8 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=npolyf_u_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=npolyf_u_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=npolyf_u_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=npolyf_u_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -1049,34 +830,22 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "npolyf_u_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "npolyf_u_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < npolyf_u_l:
-            self.l_res = npolyf_u_l
-        if (self.w_res) < npolyf_u_w:
-            self.w_res = npolyf_u_w
+        if (self.l) < npolyf_u_l:
+            self.l = npolyf_u_l
+        if (self.w) < npolyf_u_w:
+            self.w = npolyf_u_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -1087,7 +856,7 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -1096,17 +865,8 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_npolyf_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="npolyf_u",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_npolyf_u_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -1134,8 +894,8 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
         # ===================== PARAMETERS DECLARATIONS =====================
         self.param("deepnwell", self.TypeBoolean, "Deep NWELL", default=0)
         self.param("pcmpgr", self.TypeBoolean, "Guard Ring", default=0)
-        self.param("w_res", self.TypeDouble, "Width", default=ppolyf_u_l, unit="um")
-        self.param("l_res", self.TypeDouble, "Length", default=ppolyf_u_w, unit="um")
+        self.param("l", self.TypeDouble, "Width", default=ppolyf_u_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=ppolyf_u_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -1147,34 +907,22 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
-            "ppolyf_u_resistor(L="
-            + ("%.3f" % self.l_res)
-            + ",W="
-            + ("%.3f" % self.w_res)
-            + ")"
+            "ppolyf_u_resistor(L=" + ("%.3f" % self.l) + ",W=" + ("%.3f" % self.w) + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < ppolyf_u_l:
-            self.l_res = ppolyf_u_l
-        if (self.w_res) < ppolyf_u_w:
-            self.w_res = ppolyf_u_w
+        if (self.l) < ppolyf_u_l:
+            self.l = ppolyf_u_l
+        if (self.w) < ppolyf_u_w:
+            self.w = ppolyf_u_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -1185,7 +933,7 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
         #     # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         #     # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -1194,17 +942,8 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_ppolyf_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            res_type="ppolyf_u",
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+        np_instance = draw_ppolyf_u_res(
+            self.layout, self.l, self.w, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),
@@ -1236,12 +975,8 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
         self.Type_handle.add_choice("3.3V", "3.3V")
         self.Type_handle.add_choice("5/6V", "5/6V")
 
-        self.param(
-            "w_res", self.TypeDouble, "Width", default=ppolyf_u_h_res_l, unit="um"
-        )
-        self.param(
-            "l_res", self.TypeDouble, "Length", default=ppolyf_u_h_res_w, unit="um"
-        )
+        self.param("l", self.TypeDouble, "Width", default=ppolyf_u_h_res_l, unit="um")
+        self.param("w", self.TypeDouble, "Length", default=ppolyf_u_h_res_w, unit="um")
         self.param("area", self.TypeDouble, "Area", readonly=True, unit="um^2")
         self.param("perim", self.TypeDouble, "Perimeter", readonly=True, unit="um")
         self.param("array_x", self.TypeInt, "Repeat X", default=1)
@@ -1253,34 +988,26 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
             "y_spacing", self.TypeDouble, "spacing in y_direction", default=3, unit="um"
         )
 
-        self.param("lbl", self.TypeBoolean, "Labels", default=0)
-
-        self.param("r0_lbl", self.TypeString, "R0 label", default="")
-
-        self.param("r1_lbl", self.TypeString, "R1 label", default="")
-
-        self.param("sub_lbl", self.TypeString, "Substrate label", default="")
-
     def display_text_impl(self):
         # Provide a descriptive text for the cell
         return (
             "ppolyf_u_high_Rs_resistor(L="
-            + ("%.3f" % self.l_res)
+            + ("%.3f" % self.l)
             + ",W="
-            + ("%.3f" % self.w_res)
+            + ("%.3f" % self.w)
             + ")"
         )
 
     def coerce_parameters_impl(self):
         # We employ coerce_parameters_impl to decide whether the handle or the numeric parameter has changed.
         #  We also update the numerical value or the shape, depending on which on has not changed.
-        self.area = self.w_res * self.l_res
-        self.perim = 2 * (self.w_res + self.l_res)
+        self.area = self.w * self.l
+        self.perim = 2 * (self.w + self.l)
         # w,l must be larger or equal than min. values.
-        if (self.l_res) < ppolyf_u_h_res_l:
-            self.l_res = ppolyf_u_h_res_l
-        if (self.w_res) < ppolyf_u_h_res_w:
-            self.w_res = ppolyf_u_h_res_w
+        if (self.l) < ppolyf_u_h_res_l:
+            self.l = ppolyf_u_h_res_l
+        if (self.w) < ppolyf_u_h_res_w:
+            self.w = ppolyf_u_h_res_w
 
     def can_create_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we can use any shape which
@@ -1291,7 +1018,7 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
         # Implement the "Create PCell from shape" protocol: we set r and l from the shape's
         # bounding box width and layer
         self.r = self.shape.bbox().width() * self.layout.dbu / 2
-        self.l_res = self.layout.get_info(self.layer)
+        self.l = self.layout.get_info(self.layer)
 
     def transformation_from_shape_impl(self):
         # Implement the "Create PCell from shape" protocol: we use the center of the shape's
@@ -1301,16 +1028,7 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
         np_instance = draw_ppolyf_u_high_Rs_res(
-            layout=self.layout,
-            l_res=self.l_res,
-            w_res=self.w_res,
-            volt=self.volt,
-            deepnwell=self.deepnwell,
-            pcmpgr=self.pcmpgr,
-            lbl=self.lbl,
-            r0_lbl=self.r0_lbl,
-            r1_lbl=self.r1_lbl,
-            sub_lbl=self.sub_lbl,
+            self.layout, self.l, self.w, self.volt, self.deepnwell, self.pcmpgr
         )
         write_cells = pya.CellInstArray(
             np_instance.cell_index(),

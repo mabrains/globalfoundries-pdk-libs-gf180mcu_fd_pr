@@ -17,7 +17,7 @@
 ########################################################################################################################
 
 import pya
-from .draw_bjt import draw_bjt
+from .draw_bjt import *
 
 
 class npn_bjt(pya.PCellDeclarationHelper):
@@ -29,9 +29,7 @@ class npn_bjt(pya.PCellDeclarationHelper):
 
         # Important: initialize the super class
         super(npn_bjt, self).__init__()
-        self.Type_handle = self.param(
-            "Type", self.TypeList, "Type", default="npn_10p00x10p00"
-        )
+        self.Type_handle = self.param("Type", self.TypeList, "Type", default= "npn_10p00x10p00")
         self.Type_handle.add_choice("npn_10p00x10p00", "npn_10p00x10p00")
         self.Type_handle.add_choice("npn_05p00x05p00", "npn_05p00x05p00")
         self.Type_handle.add_choice("npn_00p54x16p00", "npn_00p54x16p00")
@@ -100,9 +98,7 @@ class pnp_bjt(pya.PCellDeclarationHelper):
 
         # Important: initialize the super class
         super(pnp_bjt, self).__init__()
-        self.Type_handle = self.param(
-            "Type", self.TypeList, "Type", default="pnp_10p00x10p00"
-        )
+        self.Type_handle = self.param("Type", self.TypeList, "Type", default= "pnp_10p00x10p00")
         self.Type_handle.add_choice("pnp_10p00x10p00", "pnp_10p00x10p00")
         self.Type_handle.add_choice("pnp_05p00x05p00", "pnp_05p00x05p00")
         self.Type_handle.add_choice("pnp_10p00x00p42", "pnp_10p00x00p42")
