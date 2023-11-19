@@ -111,7 +111,7 @@ $report = "antenna.lyrdb"
 $report = "density.lyrdb"
 #%include ../drc/rule_decks/density.drc
 $report = "main.lyrdb"
-#%include run_drc_main/main.drc
+#%include ../drc/rule_decks/main.drc
 
 
 </text>
