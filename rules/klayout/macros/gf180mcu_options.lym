@@ -59,7 +59,7 @@ require 'yaml'
   variant_drc_action.title = "Variant options"
   variant_drc_action.on_triggered do
     
-    variant_select = RBA::InputDialog::ask_item("Variant options", "Select variant option:", [ "A", "B", "C" , "D", "E"], 2)
+    variant_select = RBA::InputDialog::ask_item("Variant options", "Select variant option:", [ "A", "B", "C" , "D"], 2)
       options = YAML.load(File.read(__dir__ + "/drc_options.yml"))
       if variant_select
         options["variant"] = variant_select

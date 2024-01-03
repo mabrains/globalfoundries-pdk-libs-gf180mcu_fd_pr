@@ -78,13 +78,9 @@ elsif options["variant"] == "C"
   $metal_level = "5LM"
   $mim_option = "B"
 elsif options["variant"] == "D"
-  $metal_top = "9K"
-  $metal_level = "6LM"
+  $metal_top = "11K"
+  $metal_level = "5LM"
   $mim_option = "B"
-elsif options["variant"] == "E"
-  $metal_top = "9K"
-  $metal_level = "6LM"
-  $mim_option = "A"
 end
 
 $topcell = options["top_cell_name"]
