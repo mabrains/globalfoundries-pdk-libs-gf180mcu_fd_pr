@@ -1459,7 +1459,7 @@ def draw_nfet(
             lbl=lbl,
             lbl_lst=sd_lbl,
             lbl_valid_len=nf + 1,
-            index=nf,
+            index=int(nf),
         )
     )
 
@@ -1807,7 +1807,7 @@ def pfet_deep_nwell(
         gf.components.rectangle(
             size=(
                 c_inst.size[0] + (2 * nw_enc_pcmp),
-                c_inst.size[0] + (2 * nw_enc_pcmp),
+                c_inst.size[1] + (2 * nw_enc_pcmp),
             ),
             layer=layer["nwell"],
         )
@@ -2052,7 +2052,7 @@ def draw_pfet(
             lbl=lbl,
             lbl_lst=sd_lbl,
             lbl_valid_len=nf + 1,
-            index=nf,
+            index=int(nf),
         )
     )
 
@@ -2567,7 +2567,7 @@ def draw_nfet_06v0_nvt(
             lbl=lbl,
             lbl_lst=sd_lbl,
             lbl_valid_len=nf + 1,
-            index=nf,
+            index=int(nf),
         )
     )
 
