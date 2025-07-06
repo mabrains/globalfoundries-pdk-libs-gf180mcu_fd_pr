@@ -1,4 +1,4 @@
-v {xschem version=3.1.0 file_version=1.2
+v {xschem version=3.4.5 file_version=1.2
 
 * Copyright 2022 GlobalFoundries PDK Authors
 *
@@ -100,7 +100,7 @@ tclcommand="
 xschem raw_read $netlist_dir/[file tail [file rootname [xschem get current_name]]].raw
 "
 }
-C {symbols/cap_mim_2p0fF.sym} 230 -390 0 0 {name=C1
+C {symbols/cap_mim_2f0fF.sym} 230 -390 0 0 {name=C1
 W=10e-6
 L=10e-6
 model=cap_mim_2f0fF
