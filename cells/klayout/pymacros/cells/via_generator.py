@@ -44,6 +44,29 @@ def get_level_num(base_layer, base_layers, metal_level, metal_layers):
     return level_1, level_2
 
 
+def snap_to_grid(component: gf.Component, dbu: float = 0.005) -> gf.Component:
+    """Returns a new Component with all polygons snapped to the nearest DBU grid (e.g. 5nm)."""
+    # Step 1: flatten the component
+    flat = component.copy()
+    flat.flatten()
+
+    # Step 2: create the cleaned component
+    c_clean = gf.Component(name=f"{component.name}_snapped")
+
+    # Step 3: snap polygons
+    for layer, polygons in flat.get_polygons(by_spec=True).items():
+        for points in polygons:
+            if len(points) == 0:
+                continue
+            snapped = [
+                (round(x / dbu) * dbu, round(y / dbu) * dbu)
+                for x, y in points
+            ]
+            c_clean.add_polygon(snapped, layer=layer)
+
+    return c_clean
+
+
 @gf.cell
 def via_generator(
     x_range: Float2 = (0, 1),
@@ -394,8 +417,16 @@ def draw_via_dev(
         )
         c.add_ref(v5)
 
-    c.write_gds("via_stack_temp.gds")
-    layout.read("via_stack_temp.gds")
-    os.remove("via_stack_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)

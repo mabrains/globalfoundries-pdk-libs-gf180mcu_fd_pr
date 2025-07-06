@@ -19,7 +19,7 @@
 import gdsfactory as gf
 from gdsfactory.typings import LayerSpec, Float2
 from .layers_def import layer
-from .via_generator import via_generator, via_stack
+from .via_generator import via_generator, via_stack, snap_to_grid
 import os
 
 
@@ -104,13 +104,19 @@ def draw_metal_res(
             layer=m_lbl_layer,
         )
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 @gf.cell
@@ -474,11 +480,19 @@ def draw_nplus_res(
         if pcmpgr == 1:
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_pplus_res(
@@ -558,11 +572,19 @@ def draw_pplus_res(
         nw_rect.xmin = r_inst.xmin - nw_enc_pcmp
         nw_rect.ymin = r_inst.ymin - nw_enc_pcmp
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 @gf.cell
@@ -766,11 +788,19 @@ def draw_npolyf_res(
         if pcmpgr == 1:
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_ppolyf_res(
@@ -841,11 +871,19 @@ def draw_ppolyf_res(
         if pcmpgr == 1:
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_ppolyf_u_high_Rs_res(
@@ -1054,11 +1092,19 @@ def draw_ppolyf_u_high_Rs_res(
             dg.xmin = resis_mk.xmin
             dg.ymin = resis_mk.ymin
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_well_res(
@@ -1230,8 +1276,16 @@ def draw_well_res(
             layer=layer["metal1_label"],
         )
 
-    c.write_gds("res_temp.gds")
-    layout.read("res_temp.gds")
-    os.remove("res_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
