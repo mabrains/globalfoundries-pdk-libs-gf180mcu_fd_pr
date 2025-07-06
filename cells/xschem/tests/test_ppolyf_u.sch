@@ -1,4 +1,4 @@
-v {xschem version=3.0.0 file_version=1.2
+v {xschem version=3.4.5 file_version=1.2
 
 * Copyright 2022 GlobalFoundries PDK Authors
 *
@@ -21,7 +21,7 @@ V {}
 S {}
 E {}
 B 2 580 -540 1170 -80 {flags=graph
-y1=-0.027
+y1=-0.0067
 y2=0
 ypos1=0
 ypos2=2
@@ -39,7 +39,7 @@ unitx=1
 dataset=-1}
 B 2 580 -1000 1170 -540 {flags=graph
 y1=-0
-y2=130
+y2=500
 ypos1=0
 ypos2=2
 divy=5

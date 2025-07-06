@@ -1,4 +1,4 @@
-v {xschem version=3.1.0 file_version=1.2
+v {xschem version=3.4.5 file_version=1.2
 
 * Copyright 2022 GlobalFoundries PDK Authors
 *
@@ -37,3 +37,6 @@ B 5 -2.5 27.5 2.5 32.5 {name=B dir=inout propag=0 pinnumber=1}
 T {@spiceprefix@name} 20 -28.75 0 0 0.2 0.2 {}
 T {@m * @W / @L} 20 6.25 0 0 0.2 0.2 {layer=13}
 T {@model} 20 -11.25 0 0 0.2 0.2 {}
+T {Deprecated:
+Replace with
+cap_mim_2f0fF.sym} -95 -25 0 0 0.15 0.15 { layer=7}
