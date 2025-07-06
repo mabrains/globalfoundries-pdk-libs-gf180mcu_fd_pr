@@ -44,7 +44,6 @@ def get_level_num(base_layer, base_layers, metal_level, metal_layers):
     return level_1, level_2
 
 
-@gf.cell
 def snap_to_grid(component: gf.Component, dbu: float = 0.005) -> gf.Component:
     """Returns a new Component with all polygons snapped to the nearest DBU grid (e.g. 5nm)."""
     # Step 1: flatten the component
