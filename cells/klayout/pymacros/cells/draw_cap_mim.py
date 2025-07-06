@@ -1,6 +1,6 @@
 import gdsfactory as gf
 
-from .via_generator import via_generator, via_stack
+from .via_generator import via_generator, snap_to_grid
 from .layers_def import layer
 import os
 
@@ -137,8 +137,16 @@ def draw_cap_mim(
     )
     c.add_ref(via)
 
-    c.write_gds("mim_cap_temp.gds")
-    layout.read("mim_cap_temp.gds")
-    os.remove("mim_cap_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)

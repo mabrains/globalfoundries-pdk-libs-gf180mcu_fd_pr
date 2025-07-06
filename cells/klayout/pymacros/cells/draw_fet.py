@@ -17,11 +17,9 @@
 ########################################################################################################################
 
 from math import ceil, floor
-import numpy as np
-
 import gdsfactory as gf
 from gdsfactory.typings import Float2, LayerSpec
-from .via_generator import via_generator, via_stack
+from .via_generator import via_generator, via_stack, snap_to_grid
 from .layers_def import layer
 import os
 
@@ -1765,12 +1763,19 @@ def draw_nfet(
             )
         )
 
-    # creating layout and cell in klayout
-    c.write_gds("nfet_temp.gds")
-    layout.read("nfet_temp.gds")
-    os.remove("nfet_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 @gf.cell
@@ -2374,13 +2379,19 @@ def draw_pfet(
         )
         # bulk guardring
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("pfet_temp.gds")
-    layout.read("pfet_temp.gds")
-    os.remove("pfet_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_nfet_06v0_nvt(
@@ -3020,10 +3031,16 @@ def draw_nfet_06v0_nvt(
     nat.xmin = dg.xmin
     nat.ymin = dg.ymin
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("nfet_nvt_temp.gds")
-    layout.read("nfet_nvt_temp.gds")
-    os.remove("nfet_nvt_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)

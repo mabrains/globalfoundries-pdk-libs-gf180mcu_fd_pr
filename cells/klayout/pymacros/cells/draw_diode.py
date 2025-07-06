@@ -19,7 +19,7 @@
 import gdsfactory as gf
 from .layers_def import layer
 from gdsfactory.typings import Float2
-from .via_generator import via_generator, via_stack
+from .via_generator import via_generator, via_stack, snap_to_grid
 
 import numpy as np
 import os
@@ -359,13 +359,19 @@ def draw_diode_nd2ps(
 
         lvpwell.center = diode_mk.center
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("diode_nd2ps_temp.gds")
-    layout.read("diode_nd2ps_temp.gds")
-    os.remove("diode_nd2ps_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_diode_pd2nw(
@@ -692,13 +698,19 @@ def draw_diode_pd2nw(
             dg.xmin = ncmp.xmin - dg_enc_cmp
             dg.ymin = ncmp.ymin - dg_enc_cmp
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("diode_pd2nw_temp.gds")
-    layout.read("diode_pd2nw_temp.gds")
-    os.remove("diode_pd2nw_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_diode_nw2ps(
@@ -832,13 +844,19 @@ def draw_diode_nw2ps(
         dg.xmin = pcmp.xmin - dg_enc_cmp
         dg.ymin = pcmp.ymin - dg_enc_cmp
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("diode_nw2ps_temp.gds")
-    layout.read("diode_nw2ps_temp.gds")
-    os.remove("diode_nw2ps_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_diode_pw2dw(
@@ -1268,13 +1286,19 @@ def draw_diode_pw2dw(
         dg.xmin = dn_rect.xmin - dg_enc_dn
         dg.ymin = dn_rect.ymin - dg_enc_dn
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("diode_pw2dw_temp.gds")
-    layout.read("diode_pw2dw_temp.gds")
-    os.remove("diode_pw2dw_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_diode_dw2ps(
@@ -1671,11 +1695,19 @@ def draw_diode_dw2ps(
 
     # creating layout and cell in klayout
 
-    c.write_gds("diode_dw2ps_temp.gds")
-    layout.read("diode_dw2ps_temp.gds")
-    os.remove("diode_dw2ps_temp.gds")
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    return layout.cell(c.name)
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
+
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
 
 
 def draw_sc_diode(
@@ -2064,10 +2096,16 @@ def draw_sc_diode(
             )
         )  # guardring metal1
 
-    # creating layout and cell in klayout
+    # Flatten and snap to 5nm grid
+    c_clean = snap_to_grid(c, dbu=0.005)
 
-    c.write_gds("sc_diode_temp.gds")
-    layout.read("sc_diode_temp.gds")
-    os.remove("sc_diode_temp.gds")
+    # Write cleaned GDS
+    tmp_gds = f"{c_clean.name}_cleaned.gds"
+    c_clean.write_gds(tmp_gds)
 
-    return layout.cell(c.name)
+    # Read into KLayout layout
+    layout.read(tmp_gds)
+    os.remove(tmp_gds)
+
+    # Return top cell
+    return layout.cell(c_clean.name)
