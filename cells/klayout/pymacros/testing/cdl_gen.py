@@ -91,7 +91,7 @@ def cdl_gen(df, device_name):
                     """
                 )
 
-    else :
+    else:
 
         # reading netlist parameters (name,nets,type,values) for every pattern
         for i, row in df.iterrows():

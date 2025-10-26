@@ -19,7 +19,8 @@
 from math import ceil, floor
 import gdsfactory as gf
 from gdsfactory.typings import Float2, LayerSpec
-from .via_generator import via_generator, via_stack, snap_to_grid
+from .via_generator import via_generator, via_stack
+from .pcell_utilities import snap_to_grid
 from .layers_def import layer
 import os
 
@@ -1261,8 +1262,8 @@ def bulk_m1_check(bulk_con_area, m1_area, c_inst, bulk_con):
         bulk_m1.ymin = bulk_con.ymin - (bulk_m1.size[1] - bulk_con.size[1]) / 2
 
 
+@gf.cell
 def draw_nfet(
-    layout,
     l_gate: float = 0.28,
     w_gate: float = 0.22,
     sd_con_col: int = 1,
@@ -1283,7 +1284,6 @@ def draw_nfet(
     sub_lbl: str = "",
     patt_lbl: bool = 0,
 ) -> gf.Component:
-
     """
     Retern nfet
 
@@ -1341,7 +1341,7 @@ def draw_nfet(
     sd_l = sd_l_con
 
     # gds components to store a single instance and the generated device
-    c = gf.Component("nfet_dev")
+    c = gf.Component()
 
     c_inst = gf.Component("dev_temp")
 
@@ -1764,18 +1764,10 @@ def draw_nfet(
         )
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
 @gf.cell
@@ -1858,8 +1850,8 @@ def pfet_deep_nwell(
     return c
 
 
+@gf.cell
 def draw_pfet(
-    layout,
     l_gate: float = 0.28,
     w_gate: float = 0.22,
     sd_con_col: int = 1,
@@ -1880,7 +1872,6 @@ def draw_pfet(
     sub_lbl: str = "",
     patt_lbl: bool = 0,
 ) -> gf.Component:
-
     """
     Retern pfet
 
@@ -1941,7 +1932,7 @@ def draw_pfet(
     sd_l = sd_l_con
 
     # gds components to store a single instance and the generated device
-    c = gf.Component("pfet_dev")
+    c = gf.Component()
 
     c_inst = gf.Component("dev_temp")
 
@@ -2380,22 +2371,14 @@ def draw_pfet(
         # bulk guardring
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
+@gf.cell
 def draw_nfet_06v0_nvt(
-    layout,
     l_gate: float = 1.8,
     w_gate: float = 0.8,
     sd_con_col: int = 1,
@@ -2413,7 +2396,6 @@ def draw_nfet_06v0_nvt(
     sub_lbl: str = "",
     patt_lbl: bool = 0,
 ) -> gf.Component:
-
     """
     Usage:-
      used to draw Native NFET 6V transistor by specifying parameters
@@ -2460,7 +2442,7 @@ def draw_nfet_06v0_nvt(
     sd_l = sd_l_con
 
     # gds components to store a single instance and the generated device
-    c = gf.Component("nfet_nvt_dev")
+    c = gf.Component()
 
     c_inst = gf.Component("dev_temp")
 
@@ -3032,15 +3014,7 @@ def draw_nfet_06v0_nvt(
     nat.ymin = dg.ymin
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final

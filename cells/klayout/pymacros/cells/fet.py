@@ -15,8 +15,11 @@
 ########################################################################################################################
 # FET Generator for GF180MCU
 ########################################################################################################################
+
 import pya
 from .draw_fet import draw_nfet, draw_nfet_06v0_nvt, draw_pfet
+from .pcell_utilities import gf_to_pya
+
 
 fet_3p3_l = float(0.28)
 fet_3p3_w = float(0.22)
@@ -164,8 +167,7 @@ class nfet(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        nfet_instance = draw_nfet(
-            layout=self.layout,
+        instance = draw_nfet(
             l_gate=self.l_gate,
             w_gate=self.w_gate,
             sd_con_col=self.sd_con_col,
@@ -186,8 +188,12 @@ class nfet(pya.PCellDeclarationHelper):
             sub_lbl=self.sub_lbl,
             patt_lbl=self.patt_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "nfet")
+
         write_cells = pya.CellInstArray(
-            nfet_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -322,7 +328,6 @@ class pfet(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         instance = draw_pfet(
-            self.layout,
             l_gate=self.l_gate,
             w_gate=self.w_gate,
             sd_con_col=self.sd_con_col,
@@ -343,6 +348,10 @@ class pfet(pya.PCellDeclarationHelper):
             sub_lbl=self.sub_lbl,
             patt_lbl=self.patt_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "pfet")
+
         write_cells = pya.CellInstArray(
             instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
@@ -459,7 +468,6 @@ class nfet_06v0_nvt(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         instance = draw_nfet_06v0_nvt(
-            self.layout,
             l_gate=self.l_gate,
             w_gate=self.w_gate,
             sd_con_col=self.sd_con_col,
@@ -477,6 +485,9 @@ class nfet_06v0_nvt(pya.PCellDeclarationHelper):
             sub_lbl=self.sub_lbl,
             patt_lbl=self.patt_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "nfet_nvt")
 
         write_cells = pya.CellInstArray(
             instance.cell_index(),

@@ -19,12 +19,12 @@
 import gdsfactory as gf
 from gdsfactory.typings import LayerSpec, Float2
 from .layers_def import layer
-from .via_generator import via_generator, via_stack, snap_to_grid
-import os
+from .via_generator import via_generator, via_stack
+from .pcell_utilities import snap_to_grid
 
 
+@gf.cell
 def draw_metal_res(
-    layout,
     l_res: float = 0.1,
     w_res: float = 0.1,
     res_type: str = "rm1",
@@ -42,7 +42,7 @@ def draw_metal_res(
      w      : Float of diff width
     """
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     m_ext = 0.28
 
@@ -105,18 +105,10 @@ def draw_metal_res(
         )
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
 @gf.cell
@@ -159,7 +151,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
     rect_pcmpgr_out.move((rect_pcmpgr_in.xmin - grw, rect_pcmpgr_in.ymin - grw))
     c.add_ref(
         gf.geometry.boolean(
-            A=rect_pcmpgr_out, B=rect_pcmpgr_in, operation="A-B", layer=layer["comp"],
+            A=rect_pcmpgr_out,
+            B=rect_pcmpgr_in,
+            operation="A-B",
+            layer=layer["comp"],
         )
     )  # guardring bulk
 
@@ -173,7 +168,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
         )
     )
     psdm_in.move(
-        (rect_pcmpgr_in.xmin + comp_pp_enc, rect_pcmpgr_in.ymin + comp_pp_enc,)
+        (
+            rect_pcmpgr_in.xmin + comp_pp_enc,
+            rect_pcmpgr_in.ymin + comp_pp_enc,
+        )
     )
     psdm_out = c_temp_gr.add_ref(
         gf.components.rectangle(
@@ -185,7 +183,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
         )
     )
     psdm_out.move(
-        (rect_pcmpgr_out.xmin - comp_pp_enc, rect_pcmpgr_out.ymin - comp_pp_enc,)
+        (
+            rect_pcmpgr_out.xmin - comp_pp_enc,
+            rect_pcmpgr_out.ymin - comp_pp_enc,
+        )
     )
     c.add_ref(
         gf.geometry.boolean(
@@ -197,7 +198,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
 
     c.add_ref(
         via_generator(
-            x_range=(rect_pcmpgr_in.xmin + con_size, rect_pcmpgr_in.xmax - con_size,),
+            x_range=(
+                rect_pcmpgr_in.xmin + con_size,
+                rect_pcmpgr_in.xmax - con_size,
+            ),
             y_range=(rect_pcmpgr_out.ymin, rect_pcmpgr_in.ymin),
             via_enclosure=(con_comp_enc, con_comp_enc),
             via_layer=layer["contact"],
@@ -208,7 +212,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
 
     c.add_ref(
         via_generator(
-            x_range=(rect_pcmpgr_in.xmin + con_size, rect_pcmpgr_in.xmax - con_size,),
+            x_range=(
+                rect_pcmpgr_in.xmin + con_size,
+                rect_pcmpgr_in.xmax - con_size,
+            ),
             y_range=(rect_pcmpgr_in.ymax, rect_pcmpgr_out.ymax),
             via_enclosure=(con_comp_enc, con_comp_enc),
             via_layer=layer["contact"],
@@ -220,7 +227,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
     c.add_ref(
         via_generator(
             x_range=(rect_pcmpgr_out.xmin, rect_pcmpgr_in.xmin),
-            y_range=(rect_pcmpgr_in.ymin + con_size, rect_pcmpgr_in.ymax - con_size,),
+            y_range=(
+                rect_pcmpgr_in.ymin + con_size,
+                rect_pcmpgr_in.ymax - con_size,
+            ),
             via_enclosure=(con_comp_enc, con_comp_enc),
             via_layer=layer["contact"],
             via_size=(con_size, con_size),
@@ -231,7 +241,10 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
     c.add_ref(
         via_generator(
             x_range=(rect_pcmpgr_in.xmax, rect_pcmpgr_out.xmax),
-            y_range=(rect_pcmpgr_in.ymin + con_size, rect_pcmpgr_in.ymax - con_size,),
+            y_range=(
+                rect_pcmpgr_in.ymin + con_size,
+                rect_pcmpgr_in.ymax - con_size,
+            ),
             via_enclosure=(con_comp_enc, con_comp_enc),
             via_layer=layer["contact"],
             via_size=(con_size, con_size),
@@ -248,16 +261,22 @@ def pcmpgr_gen(dn_rect, grw: float = 0.36) -> gf.Component:
 
     comp_m1_out = c_temp_gr.add_ref(
         gf.components.rectangle(
-            size=((comp_m1_in.size[0]) + 2 * grw, (comp_m1_in.size[1]) + 2 * grw,),
+            size=(
+                (comp_m1_in.size[0]) + 2 * grw,
+                (comp_m1_in.size[1]) + 2 * grw,
+            ),
             layer=layer["metal1"],
         )
     )
     comp_m1_out.move((rect_pcmpgr_in.xmin - grw, rect_pcmpgr_in.ymin - grw))
     c.add_ref(
         gf.geometry.boolean(
-            A=rect_pcmpgr_out, B=rect_pcmpgr_in, operation="A-B", layer=layer["metal1"],
+            A=rect_pcmpgr_out,
+            B=rect_pcmpgr_in,
+            operation="A-B",
+            layer=layer["metal1"],
         )
-    )  # metal1 guardring
+    )  # metal1 guard ring
 
     return c
 
@@ -300,7 +319,10 @@ def plus_res_inst(
             sab_rect_size = (res_mk.size[0], (res_mk.size[1] + (2 * sab_res_ext)))
 
         sab_rect = c.add_ref(
-            gf.components.rectangle(size=sab_rect_size, layer=layer["sab"],)
+            gf.components.rectangle(
+                size=sab_rect_size,
+                layer=layer["sab"],
+            )
         )
         sab_rect.center = res_mk.center
 
@@ -407,8 +429,8 @@ def plus_res_inst(
     return c
 
 
+@gf.cell
 def draw_nplus_res(
-    layout,
     l_res: float = 0.1,
     w_res: float = 0.1,
     res_type: str = "nplus_s",
@@ -421,7 +443,7 @@ def draw_nplus_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     lvpwell_enc_cmp = 0.43
     dn_enc_lvpwell = 2.5
@@ -481,22 +503,14 @@ def draw_nplus_res(
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
+@gf.cell
 def draw_pplus_res(
-    layout,
     l_res: float = 0.1,
     w_res: float = 0.1,
     res_type: str = "pplus_s",
@@ -509,7 +523,7 @@ def draw_pplus_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     nw_enc_pcmp = 0.6
     dn_enc_ncmp = 0.66
@@ -573,18 +587,10 @@ def draw_pplus_res(
         nw_rect.ymin = r_inst.ymin - nw_enc_pcmp
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
 @gf.cell
@@ -625,7 +631,10 @@ def polyf_res_inst(
             sab_rect_size = (res_mk.size[0], (res_mk.size[1] + (2 * sab_res_ext)))
 
         sab_rect = c.add_ref(
-            gf.components.rectangle(size=sab_rect_size, layer=layer["sab"],)
+            gf.components.rectangle(
+                size=sab_rect_size,
+                layer=layer["sab"],
+            )
         )
         sab_rect.center = res_mk.center
 
@@ -725,8 +734,8 @@ def polyf_res_inst(
     return c
 
 
+@gf.cell
 def draw_npolyf_res(
-    layout,
     l_res: float = 0.1,
     w_res: float = 0.1,
     res_type: str = "npolyf_s",
@@ -738,7 +747,7 @@ def draw_npolyf_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     sub_w = 0.36
     sub_sp = 0.26 if deepnwell == 0 else 0.4
@@ -789,22 +798,14 @@ def draw_npolyf_res(
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
+@gf.cell
 def draw_ppolyf_res(
-    layout,
     l_res: float = 0.1,
     w_res: float = 0.1,
     res_type: str = "ppolyf_s",
@@ -816,7 +817,7 @@ def draw_ppolyf_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     sub_w = 0.36
     dn_enc_ncmp = 0.66
@@ -872,22 +873,14 @@ def draw_ppolyf_res(
             c.add_ref(pcmpgr_gen(dn_rect=dn_rect, grw=sub_w))
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
+@gf.cell
 def draw_ppolyf_u_high_Rs_res(
-    layout,
     l_res: float = 0.42,
     w_res: float = 0.42,
     volt: str = "3.3V",
@@ -899,7 +892,7 @@ def draw_ppolyf_u_high_Rs_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     dn_enc_ncmp = 0.62 if volt == "3.3V" else 0.66
     dn_enc_poly2 = 1.34
@@ -949,7 +942,10 @@ def draw_ppolyf_u_high_Rs_res(
         )
 
     sab_rect = c.add_ref(
-        gf.components.rectangle(size=sab_rect_size, layer=layer["sab"],)
+        gf.components.rectangle(
+            size=sab_rect_size,
+            layer=layer["sab"],
+        )
     )
     sab_rect.center = res_mk.center
 
@@ -970,7 +966,10 @@ def draw_ppolyf_u_high_Rs_res(
     )
 
     pl_con_arr = c.add_array(
-        component=pl_con, rows=1, columns=2, spacing=(pl.size[0] - con_size, 0),
+        component=pl_con,
+        rows=1,
+        columns=2,
+        spacing=(pl.size[0] - con_size, 0),
     )  # comp contact array
 
     pplus = gf.components.rectangle(
@@ -1047,7 +1046,12 @@ def draw_ppolyf_u_high_Rs_res(
             pl.size[1] + (2 * pp_enc_cmp),
         )
 
-    sub_imp = c.add_ref(gf.components.rectangle(size=sub_imp_size, layer=sub_layer,))
+    sub_imp = c.add_ref(
+        gf.components.rectangle(
+            size=sub_imp_size,
+            layer=sub_layer,
+        )
+    )
     sub_imp.center = sub_rect.center
 
     if deepnwell == 1:
@@ -1093,22 +1097,14 @@ def draw_ppolyf_u_high_Rs_res(
             dg.ymin = resis_mk.ymin
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
 
 
+@gf.cell
 def draw_well_res(
-    layout,
     l_res: float = 0.42,
     w_res: float = 0.42,
     res_type: str = "nwell",
@@ -1119,7 +1115,7 @@ def draw_well_res(
     sub_lbl: str = "",
 ) -> gf.Component:
 
-    c = gf.Component("res_dev")
+    c = gf.Component()
 
     nw_res_ext = 0.48
     nw_res_enc = 0.5
@@ -1277,15 +1273,7 @@ def draw_well_res(
         )
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final

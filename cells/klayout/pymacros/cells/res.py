@@ -27,6 +27,8 @@ from .draw_res import (
     draw_ppolyf_u_high_Rs_res,
     draw_well_res,
 )
+from .pcell_utilities import gf_to_pya
+
 
 rm1_l = 0.23
 rm1_w = 0.23
@@ -197,8 +199,7 @@ class metal_resistor(pya.PCellDeclarationHelper):
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
 
-        np_instance = draw_metal_res(
-            layout=self.layout,
+        instance = draw_metal_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type=self.res_type,
@@ -207,8 +208,12 @@ class metal_resistor(pya.PCellDeclarationHelper):
             r0_lbl=self.r0_lbl,
             r1_lbl=self.r1_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -294,8 +299,7 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_nplus_res(
-            layout=self.layout,
+        instance = draw_nplus_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="nplus_s",
@@ -307,8 +311,12 @@ class nplus_s_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -393,8 +401,7 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_pplus_res(
-            layout=self.layout,
+        instance = draw_pplus_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="pplus_s",
@@ -405,8 +412,12 @@ class pplus_s_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -492,8 +503,7 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_nplus_res(
-            layout=self.layout,
+        instance = draw_nplus_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="nplus_u",
@@ -505,8 +515,12 @@ class nplus_u_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -591,8 +605,7 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_pplus_res(
-            layout=self.layout,
+        instance = draw_pplus_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="pplus_u",
@@ -603,8 +616,12 @@ class pplus_u_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -687,8 +704,7 @@ class nwell_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_well_res(
-            layout=self.layout,
+        instance = draw_well_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="nwell",
@@ -698,8 +714,12 @@ class nwell_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -783,8 +803,7 @@ class pwell_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_well_res(
-            layout=self.layout,
+        instance = draw_well_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="pwell",
@@ -794,8 +813,12 @@ class pwell_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -880,8 +903,7 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_npolyf_res(
-            layout=self.layout,
+        instance = draw_npolyf_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="npolyf_s",
@@ -892,8 +914,12 @@ class npolyf_s_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -978,8 +1004,7 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_ppolyf_res(
-            layout=self.layout,
+        instance = draw_ppolyf_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="ppolyf_s",
@@ -990,8 +1015,12 @@ class ppolyf_s_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -1076,8 +1105,7 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_npolyf_res(
-            layout=self.layout,
+        instance = draw_npolyf_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="npolyf_u",
@@ -1088,8 +1116,12 @@ class npolyf_u_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -1174,8 +1206,7 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_ppolyf_res(
-            layout=self.layout,
+        instance = draw_ppolyf_res(
             l_res=self.l_res,
             w_res=self.w_res,
             res_type="ppolyf_u",
@@ -1186,8 +1217,12 @@ class ppolyf_u_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),
@@ -1280,8 +1315,7 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
 
     def produce_impl(self):
         dbu_PERCISION = 1 / self.layout.dbu
-        np_instance = draw_ppolyf_u_high_Rs_res(
-            layout=self.layout,
+        instance = draw_ppolyf_u_high_Rs_res(
             l_res=self.l_res,
             w_res=self.w_res,
             volt=self.volt,
@@ -1292,8 +1326,12 @@ class ppolyf_u_high_Rs_resistor(pya.PCellDeclarationHelper):
             r1_lbl=self.r1_lbl,
             sub_lbl=self.sub_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "res")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(self.x_spacing * dbu_PERCISION, 0),
             pya.Vector(0, self.y_spacing * dbu_PERCISION),

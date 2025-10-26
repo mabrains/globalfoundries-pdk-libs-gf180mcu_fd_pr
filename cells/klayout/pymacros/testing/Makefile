@@ -28,21 +28,12 @@ all : test-pcell
 
 test-pcell: test-diode  test-MIM  test-cap_mos  test-FET  test-RES
 
-#============================
-# --------- DRC-PV ----------
-#============================
-
-DRC-PV:
-	@cd ../../../../
-	@rm -rf globalfoundries-pdk-libs-gf180mcu_fd_pv/ && git clone https://github.com/efabless/globalfoundries-pdk-libs-gf180mcu_fd_pv.git
-
-
 #=================================
 # ---------- test-BJT --------
 #=================================
 
 .ONESHELL:
-test-bjt: DRC-PV
+test-bjt:
 	@cd $(Testing_DIR)
 	@mkdir -p $(run_folder)/bjt
 	@echo "===== test BJT pcells ====="
@@ -55,7 +46,7 @@ test-bjt: DRC-PV
 #=================================
 
 .ONESHELL:
-test-diode: DRC-PV
+test-diode:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/diode
 	@echo "===== test diode pcells ====="
@@ -68,7 +59,7 @@ test-diode: DRC-PV
 #=================================
 
 .ONESHELL:
-test-MIM: DRC-PV
+test-MIM:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/cap_mim
 	@echo "===== test MIM pcells ====="
@@ -83,7 +74,7 @@ test-MIM: DRC-PV
 .ONESHELL:
 test-FET : test-nfet_03v3 test-nfet_05v0 test-nfet_06v0  test-pfet_03v3 test-pfet_05v0 test-pfet_06v0 
 
-test-nfet_03v3: DRC-PV
+test-nfet_03v3:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/nfet_03v3
 	@echo "===== test nfet_03v3 pcells ====="
@@ -91,7 +82,7 @@ test-nfet_03v3: DRC-PV
 	@rm -rf $(Testing_DIR)/../../../../globalfoundries-pdk-libs-gf180mcu_fd_pv/
 	@mv -f drc_run_* lvs_run_* testcases $(run_folder)/nfet_03v3
 
-test-nfet_05v0: DRC-PV
+test-nfet_05v0:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/nfet_05v0
 	@echo "===== test nfet_05v0 pcells ====="
@@ -99,7 +90,7 @@ test-nfet_05v0: DRC-PV
 	@rm -rf $(Testing_DIR)/../../../../globalfoundries-pdk-libs-gf180mcu_fd_pv/
 	@mv -f drc_run_* lvs_run_* testcases $(run_folder)/nfet_05v0
 
-test-nfet_06v0: DRC-PV
+test-nfet_06v0:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/nfet_06v0
 	@echo "===== test nfet_06v0 pcells ====="
@@ -107,7 +98,7 @@ test-nfet_06v0: DRC-PV
 	@rm -rf $(Testing_DIR)/../../../../globalfoundries-pdk-libs-gf180mcu_fd_pv/
 	@mv -f drc_run_* lvs_run_* testcases $(run_folder)/nfet_06v0
 	
-test-pfet_03v3: DRC-PV
+test-pfet_03v3:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/pfet_03v3
 	@echo "===== test pfet_03v3 pcells ====="
@@ -115,7 +106,7 @@ test-pfet_03v3: DRC-PV
 	@rm -rf $(Testing_DIR)/../../../../globalfoundries-pdk-libs-gf180mcu_fd_pv/
 	@mv -f drc_run_* lvs_run_* testcases $(run_folder)/pfet_03v3
 
-test-pfet_05v0: DRC-PV
+test-pfet_05v0:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/pfet_05v0
 	@echo "===== test pfet_05v0 pcells ====="
@@ -123,7 +114,7 @@ test-pfet_05v0: DRC-PV
 	@rm -rf $(Testing_DIR)/../../../../globalfoundries-pdk-libs-gf180mcu_fd_pv/
 	@mv -f drc_run_* lvs_run_* testcases $(run_folder)/pfet_05v0
 
-test-pfet_06v0: DRC-PV
+test-pfet_06v0:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/pfet_06v0
 	@echo "===== test pfet_06v0 pcells ====="
@@ -137,7 +128,7 @@ test-pfet_06v0: DRC-PV
 #=================================
 
 .ONESHELL:
-test-cap_mos: DRC-PV
+test-cap_mos:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/cap_mos
 	@echo "===== test cap_mos pcells ====="
@@ -150,7 +141,7 @@ test-cap_mos: DRC-PV
 #=================================
 
 .ONESHELL:
-test-RES: DRC-PV
+test-RES:
 	@cd $(Testing_DIR)
 	@mkdir -p  $(run_folder)/res
 	@echo "===== test res pcells ====="

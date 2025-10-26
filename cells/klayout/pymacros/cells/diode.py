@@ -25,6 +25,8 @@ from .draw_diode import (
     draw_diode_pw2dw,
     draw_sc_diode,
 )
+from .pcell_utilities import gf_to_pya
+
 
 np_l = 0.36
 np_w = 0.36
@@ -117,8 +119,7 @@ class diode_nd2ps(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        np_instance = draw_diode_nd2ps(
-            self.layout,
+        instance = draw_diode_nd2ps(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -129,8 +130,12 @@ class diode_nd2ps(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "diode_nd2ps")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -207,8 +212,7 @@ class diode_pd2nw(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        np_instance = draw_diode_pd2nw(
-            self.layout,
+        instance = draw_diode_pd2nw(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -219,8 +223,12 @@ class diode_pd2nw(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "diode_pd2nw")
+
         write_cells = pya.CellInstArray(
-            np_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -295,8 +303,7 @@ class diode_nw2ps(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        nwp_instance = draw_diode_nw2ps(
-            self.layout,
+        instance = draw_diode_nw2ps(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -305,8 +312,12 @@ class diode_nw2ps(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "diode_nw2ps")
+
         write_cells = pya.CellInstArray(
-            nwp_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -384,8 +395,7 @@ class diode_pw2dw(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        diode_pw2dw_instance = draw_diode_pw2dw(
-            self.layout,
+        instance = draw_diode_pw2dw(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -395,8 +405,12 @@ class diode_pw2dw(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "diode_pw2dw")
+
         write_cells = pya.CellInstArray(
-            diode_pw2dw_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -471,8 +485,7 @@ class diode_dw2ps(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        diode_dw2ps_instance = draw_diode_dw2ps(
-            self.layout,
+        instance = draw_diode_dw2ps(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -482,8 +495,12 @@ class diode_dw2ps(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "diode_dw2ps")
+
         write_cells = pya.CellInstArray(
-            diode_dw2ps_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),
@@ -554,8 +571,7 @@ class sc_diode(pya.PCellDeclarationHelper):
         return pya.Trans(self.shape.bbox().center())
 
     def produce_impl(self):
-        sc_instance = draw_sc_diode(
-            self.layout,
+        instance = draw_sc_diode(
             la=self.la,
             wa=self.wa,
             cw=self.cw,
@@ -565,8 +581,12 @@ class sc_diode(pya.PCellDeclarationHelper):
             p_lbl=self.p_lbl,
             n_lbl=self.n_lbl,
         )
+
+        # creating layout and cell in klayout
+        instance = gf_to_pya(self.layout, instance, "sc_diode")
+
         write_cells = pya.CellInstArray(
-            sc_instance.cell_index(),
+            instance.cell_index(),
             pya.Trans(pya.Point(0, 0)),
             pya.Vector(0, 0),
             pya.Vector(0, 0),

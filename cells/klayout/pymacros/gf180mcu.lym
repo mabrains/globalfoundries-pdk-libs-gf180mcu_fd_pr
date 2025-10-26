@@ -37,13 +37,29 @@ import os
 technology_macros_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, technology_macros_path)
 
-from cells import gf180mcu
+# Load the gdsfactory based PCells
+try:
+    from cells import gf180mcu
+    
+    # Instantiate and register the library
+    gf180mcu()
+    print("## gf180mcu PDK Pcells loaded.")
+except Exception as e:
+    print(f"## gf180mcu PDK gdsfactory based Pcells failed to load, got an exception: {e}.")
+    print("## Please check that you have a relevant gdsfactory module version installed.")
+
+# Load the KLayout API based PCells
+from klayout_api_cells import gf180mcu_klayoutapi
 
 # Instantiate and register the library
-gf180mcu()
+gf180mcu_klayoutapi()
 
-print("## gf180mcu PDK Pcells loaded.")
-print(sys.path)
+# check if GF_PDK_OPTION is set
+if "GF_PDK_OPTION" not in os.environ:
+    print("## Warning: environmental variable GF_PDK_OPTION is not set, assuming option D.")
+    os.environ["GF_PDK_OPTION"] = "D"
+
+print("## gf180mcu PDK KLayout API Pcells loaded.")
 
 </text>
 </klayout-macro>

@@ -20,6 +20,7 @@ from math import ceil, floor
 import gdsfactory as gf
 from gdsfactory.typings import Float2, LayerSpec
 from .layers_def import layer
+from .pcell_utilities import snap_to_grid
 import os
 
 
@@ -44,29 +45,6 @@ def get_level_num(base_layer, base_layers, metal_level, metal_layers):
     return level_1, level_2
 
 
-def snap_to_grid(component: gf.Component, dbu: float = 0.005) -> gf.Component:
-    """Returns a new Component with all polygons snapped to the nearest DBU grid (e.g. 5nm)."""
-    # Step 1: flatten the component
-    flat = component.copy()
-    flat.flatten()
-
-    # Step 2: create the cleaned component
-    c_clean = gf.Component(name=f"{component.name}_snapped")
-
-    # Step 3: snap polygons
-    for layer, polygons in flat.get_polygons(by_spec=True).items():
-        for points in polygons:
-            if len(points) == 0:
-                continue
-            snapped = [
-                (round(x / dbu) * dbu, round(y / dbu) * dbu)
-                for x, y in points
-            ]
-            c_clean.add_polygon(snapped, layer=layer)
-
-    return c_clean
-
-
 @gf.cell
 def via_generator(
     x_range: Float2 = (0, 1),
@@ -76,7 +54,6 @@ def via_generator(
     via_enclosure: Float2 = (0.06, 0.06),
     via_spacing: Float2 = (0.17, 0.17),
 ) -> gf.Component():
-
     """
     return only vias withen the range xrange and yrange while enclosing by via_enclosure
     and set number of rows and number of coloumns according to ranges and via size and spacing
@@ -125,7 +102,6 @@ def via_stack(
     metal_level: int = 1,
     base_layer: LayerSpec = layer["comp"],
 ) -> gf.Component:
-
     """
     return via stack till the metal level indicated where :
     metal_level 1 : till m1
@@ -249,6 +225,7 @@ def via_stack(
     return c
 
 
+@gf.cell
 def draw_via_dev(
     layout,
     x_min: float = 0,
@@ -257,17 +234,14 @@ def draw_via_dev(
     y_max: float = 2,
     metal_level: str = "M1",
     base_layer: str = "comp",
-):
-
+) -> gf.Component:
     """
-
-    return via stack till the metal level indicated where :
+    Return via stack till the metal level indicated where :
     metal_level 1 : till m1
     metal_level 2 : till m2
     metal_level 3 : till m3
     metal_level 4 : till m4
     metal_level 5 : till m5
-    withen the range xrange and yrange and expecting the base_layer to be drawen
 
     Args:
         layout : layout object
@@ -275,10 +249,9 @@ def draw_via_dev(
         x_max :  right x_point of vias generated
         y_min :  bottom y_point of vias generated
         y_max :  top y_point of vias generated
-
     """
 
-    c = gf.Component("via_stack_dev")
+    c = gf.Component()
 
     # vias dimensions
     x_range = x_max - x_min
@@ -418,15 +391,7 @@ def draw_via_dev(
         c.add_ref(v5)
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final

@@ -19,9 +19,9 @@
 import gdsfactory as gf
 from gdsfactory.typings import Float2, LayerSpec
 
-from .via_generator import via_generator, via_stack, snap_to_grid
+from .via_generator import via_generator, via_stack
+from .pcell_utilities import snap_to_grid
 from .layers_def import layer
-
 import numpy as np
 import os
 
@@ -96,7 +96,10 @@ def cap_mos_inst(
     )
 
     c_inst.add_array(
-        component=cmp_con_el, rows=1, columns=2, spacing=(cmp_w - con_w, 0),
+        component=cmp_con_el,
+        rows=1,
+        columns=2,
+        spacing=(cmp_w - con_w, 0),
     )  # comp contact
 
     imp_rect = c_inst.add_ref(
@@ -126,7 +129,10 @@ def cap_mos_inst(
     )
 
     pl_con = c_inst.add_array(
-        component=pl_con_el, rows=2, columns=1, spacing=(0, pl_l - con_w),
+        component=pl_con_el,
+        rows=2,
+        columns=1,
+        spacing=(0, pl_l - con_w),
     )
 
     # Gate labels_generation
@@ -152,8 +158,8 @@ def cap_mos_inst(
     return c_inst
 
 
+@gf.cell
 def draw_cap_mos(
-    layout,
     type: str = "cap_nmos",
     lc: float = 0.1,
     wc: float = 0.1,
@@ -173,7 +179,7 @@ def draw_cap_mos(
      w      : Float of diff width
     """
 
-    c = gf.Component("cap_mos_dev")
+    c = gf.Component()
 
     con_size = 0.22
     con_sp = 0.28
@@ -413,7 +419,10 @@ def draw_cap_mos(
             )
         )
         psdm_in.move(
-            (rect_pcmpgr_in.xmin + comp_pp_enc, rect_pcmpgr_in.ymin + comp_pp_enc,)
+            (
+                rect_pcmpgr_in.xmin + comp_pp_enc,
+                rect_pcmpgr_in.ymin + comp_pp_enc,
+            )
         )
         psdm_out = c_temp_gr.add_ref(
             gf.components.rectangle(
@@ -425,7 +434,10 @@ def draw_cap_mos(
             )
         )
         psdm_out.move(
-            (rect_pcmpgr_out.xmin - comp_pp_enc, rect_pcmpgr_out.ymin - comp_pp_enc,)
+            (
+                rect_pcmpgr_out.xmin - comp_pp_enc,
+                rect_pcmpgr_out.ymin - comp_pp_enc,
+            )
         )
         c.add_ref(
             gf.geometry.boolean(A=psdm_out, B=psdm_in, operation="A-B", layer=gr_imp)
@@ -507,7 +519,10 @@ def draw_cap_mos(
 
         comp_m1_out = c_temp_gr.add_ref(
             gf.components.rectangle(
-                size=((comp_m1_in.size[0]) + 2 * grw, (comp_m1_in.size[1]) + 2 * grw,),
+                size=(
+                    (comp_m1_in.size[0]) + 2 * grw,
+                    (comp_m1_in.size[1]) + 2 * grw,
+                ),
                 layer=layer["metal1"],
             )
         )
@@ -522,15 +537,7 @@ def draw_cap_mos(
         )  # guardring metal1
 
     # Flatten and snap to 5nm grid
-    c_clean = snap_to_grid(c, dbu=0.005)
-
-    # Write cleaned GDS
-    tmp_gds = f"{c_clean.name}_cleaned.gds"
-    c_clean.write_gds(tmp_gds)
-
-    # Read into KLayout layout
-    layout.read(tmp_gds)
-    os.remove(tmp_gds)
+    c_final = snap_to_grid(c, dbu=0.005)
 
     # Return top cell
-    return layout.cell(c_clean.name)
+    return c_final
